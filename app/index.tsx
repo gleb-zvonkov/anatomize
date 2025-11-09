@@ -7,7 +7,7 @@ import {
   Image, //for the images of each region
   View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";  //ensure content goes past notch
+import { SafeAreaView } from "react-native-safe-area-context"; //ensure content goes past notch
 import { useRouter } from "expo-router";
 
 
@@ -60,7 +60,8 @@ export default function Index() {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      {/* Edges top gets rid of the bottom area */}
       <FlatList
         data={regions}
         keyExtractor={(item) => item.key}
@@ -80,7 +81,7 @@ export default function Index() {
             {selectedRegion === item.key && (
               <View style={styles.iconRow}>
                 <TouchableOpacity
-                  onPress={() => router.push("/summary")}
+                  onPress={() => router.push(`/summary/${item.key}`)}
                   style={styles.buttonCard}
                 >
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -90,7 +91,7 @@ export default function Index() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => router.push("/chat")}
+                  onPress={() => router.push(`/chat/${item.key}`)}
                   style={styles.buttonCard}
                 >
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -100,7 +101,7 @@ export default function Index() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => router.push("/quiz")}
+                  onPress={() => router.push(`/quiz/${item.key}`)}
                   style={styles.buttonCard}
                 >
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
