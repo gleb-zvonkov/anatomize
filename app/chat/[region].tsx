@@ -23,6 +23,8 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState([
     { type: "gpt", text: `You're now chatting about the ${region} region.` },
   ]); //Keeps a running list of all messages (both user and GPT).
+    const [inputHeight, setInputHeight] = useState(40);   // Dynamic height for TextInput
+
 
   const handleSend = async () => {
     if (!inputText.trim()) return;
@@ -54,8 +56,27 @@ export default function ChatScreen() {
       const data = await response.json();
       const reply = data.choices?.[0]?.message?.content ?? "No reply";
 
-      // Add GPT reply to messages
-      setMessages((prev) => [...prev, { type: "gpt", text: reply }]);
+      // Add GPT reply to messages     
+      setMessages((prev) => [...prev, { type: "gpt", text: "" }]);
+      // Reveal the reply word by word
+      let words = reply.split(" ");
+      let index = 0;
+      let revealInterval = setInterval(() => {
+        if (index < words.length) {
+          setMessages((prev) => {
+            const updated = [...prev];
+            // Update the last GPT message incrementally
+            updated[updated.length - 1].text = words
+              .slice(0, index + 1)
+              .join(" ");
+            return updated;
+          });
+          index++;
+        } else {
+          clearInterval(revealInterval);
+        }
+      }, 100);
+          
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -86,16 +107,24 @@ export default function ChatScreen() {
         ))}
       </ScrollView>
 
-      <View style={styles.inputWrapper}>
-        <TextInput
-          placeholder="Type a message..."
-          value={inputText}
-          onChangeText={setInputText}
-          style={styles.textInput}
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-          <Text style={styles.sendText}>↑</Text>
-        </TouchableOpacity>
+      <View style={styles.footer}>
+        <View
+          style={[styles.inputWrapper, { height: Math.max(50, inputHeight) }]}
+        >
+          <TextInput
+            placeholder="Type a message..."
+            value={inputText}
+            onChangeText={setInputText}
+            multiline
+            onContentSizeChange={(e) =>
+              setInputHeight(Math.min(e.nativeEvent.contentSize.height, 300))
+            }
+            style={styles.textInput}
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+            <Text style={styles.sendText}>↑</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -105,6 +134,11 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   backButton: { position: "absolute", left: 20, zIndex: 10 },
   backArrow: { fontSize: 24 },
+  footer: {
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+    backgroundColor: "#fff",
+  },
   messagesContainer: {
     flex: 1,
     marginTop: 30,
@@ -112,7 +146,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   gptMessage: {
-    fontSize: 20,
+    fontSize: 19,
     color: "#555",
     textAlign: "left",
     marginTop: 20,
@@ -120,7 +154,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   userMessage: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#000",
     alignSelf: "flex-end", // right-align like a user message
     backgroundColor: "#f0f0f0",
@@ -134,7 +168,7 @@ const styles = StyleSheet.create({
 
   inputWrapper: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     marginHorizontal: 10,
     marginBottom: 10,
     borderRadius: 25,
