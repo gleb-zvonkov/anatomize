@@ -7,12 +7,85 @@ export default function QuizScreen() {
   const router = useRouter();
   const { region } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
-  const [selected, setSelected] = useState<string | null>(null);
+    const [selected, setSelected] = useState<string | null>(null);
+    
+    type Region =
+      | "back"
+      | "thorax"
+      | "abdomen"
+      | "pelvis"
+      | "perineum"
+      | "head"
+      | "neck"
+      | "upperlimb"
+      | "lowerlimb";
 
-  const question = {
-    text: "Which organ is primarily responsible for pumping blood through the body?",
-    options: ["Lungs", "Heart", "Liver", "Kidneys"],
-  };
+    const quizData: Record<
+      Region,
+      { text: string; options: string[]; answer: string }
+    > = {
+      back: {
+        text: "Which structure protects the spinal cord?",
+        options: ["Vertebral column", "Ribs", "Skull", "Scapula"],
+        answer: "Vertebral column",
+      },
+      thorax: {
+        text: "Which organ is responsible for gas exchange?",
+        options: ["Heart", "Lungs", "Liver", "Stomach"],
+        answer: "Lungs",
+      },
+      abdomen: {
+        text: "Which organ produces bile?",
+        options: ["Stomach", "Pancreas", "Liver", "Spleen"],
+        answer: "Liver",
+      },
+      pelvis: {
+        text: "Which bone forms part of the pelvic girdle?",
+        options: ["Femur", "Ilium", "Tibia", "Sacrum"],
+        answer: "Ilium",
+      },
+      perineum: {
+        text: "The perineum is located between which two structures?",
+        options: [
+          "Anus and genitals",
+          "Liver and stomach",
+          "Heart and lungs",
+          "Spine and ribs",
+        ],
+        answer: "Anus and genitals",
+      },
+      head: {
+        text: "Which bone protects the brain?",
+        options: ["Femur", "Humerus", "Skull", "Pelvis"],
+        answer: "Skull",
+      },
+      neck: {
+        text: "Which structure passes through the neck?",
+        options: ["Spinal cord", "Femoral artery", "Pancreas", "Lungs"],
+        answer: "Spinal cord",
+      },
+      upperlimb: {
+        text: "Which bone is in the upper limb?",
+        options: ["Femur", "Humerus", "Tibia", "Fibula"],
+        answer: "Humerus",
+      },
+      lowerlimb: {
+        text: "Which muscle is primarily used for walking?",
+        options: [
+          "Biceps brachii",
+          "Quadriceps femoris",
+          "Deltoid",
+          "Trapezius",
+        ],
+        answer: "Quadriceps femoris",
+      },
+    };
+
+    const question = quizData[(region as Region) || "back"] || {
+      text: "No quiz available for this region.",
+      options: [],
+    };
+
 
   return (
     <View style={styles.container}>
@@ -25,7 +98,7 @@ export default function QuizScreen() {
       </TouchableOpacity>
 
       {/* Header */}
-      <Text style={styles.header}>{region} Quiz</Text>
+      {/* <Text style={styles.header}>{region} Quiz</Text> */}
 
       {/* Question */}
       <Text style={styles.question}>{question.text}</Text>
@@ -35,7 +108,14 @@ export default function QuizScreen() {
         <TouchableOpacity
           key={opt}
           style={[styles.option, selected === opt && styles.selectedOption]}
-          onPress={() => setSelected(opt)}
+          onPress={() => {
+            setSelected(opt);
+            if (opt === question.answer) {
+              alert("✅ Correct!");
+            } else {
+              alert(`❌ Incorrect. The correct answer is ${question.answer}.`);
+            }
+          }}
         >
           <Text
             style={[styles.optionText, selected === opt && styles.selectedText]}
@@ -57,14 +137,14 @@ const styles = StyleSheet.create({
   },
   backButton: { position: "absolute", left: 20, zIndex: 10 },
   backArrow: { fontSize: 24 },
-    header: {
-      paddingTop:20,
+  header: {
     fontSize: 26,
     fontWeight: "600",
     marginBottom: 30,
     textTransform: "capitalize",
   },
   question: {
+    paddingTop: 20,
     fontSize: 20,
     fontWeight: "500",
     marginBottom: 20,
