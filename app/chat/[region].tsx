@@ -1,57 +1,99 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  ScrollView,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-
+import { OPENAI_API_KEY } from "@env"; 
 
 export default function ChatScreen() {
   const router = useRouter();
-    const insets = useSafeAreaInsets();
-    const { region } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
+  const { region } = useLocalSearchParams();
+
+  const [inputText, setInputText] = useState(""); //Tracks what the user is typing in the TextInput
+  const [messages, setMessages] = useState([
+    { type: "gpt", text: `You're now chatting about the ${region} region.` },
+  ]); //Keeps a running list of all messages (both user and GPT).
+
+  const handleSend = async () => {
+    if (!inputText.trim()) return;
+
+    const userMessage = { type: "user", text: inputText };
+    setMessages((prev) => [...prev, userMessage]);
+    setInputText("");
+
+    // Call your GPT API
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: "You are a helpful anatomy tutor." },
+              { role: "user", content: inputText },
+            ],
+          }),
+        }
+      );
+
+      const data = await response.json();
+      const reply = data.choices?.[0]?.message?.content ?? "No reply";
+
+      // Add GPT reply to messages
+      setMessages((prev) => [...prev, { type: "gpt", text: reply }]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        { type: "gpt", text: "Error contacting API." },
+      ]);
+    }
+  };
+
 
   return (
-    <SafeAreaView style={[styles.container]}>
-      {/* Back Button */}
+    <SafeAreaView style={styles.container}>
       <TouchableOpacity
         onPress={() => router.back()}
-        style={[styles.backButton, { top: insets.top }]} // add small padding if needed
+        style={[styles.backButton, { top: insets.top }]}
       >
         <Text style={styles.backArrow}>←</Text>
       </TouchableOpacity>
 
-      {/* Chat messages area */}
-      <View style={styles.messagesContainer}>
-        <Text style={styles.gptMessage}>
-          {`You're now chatting about the ${region} region. We will contact the GPT api so that you can ask questions related to ${region}.`}
-        </Text>
+      <ScrollView style={styles.messagesContainer}>
+        {/* Loop through all messages and display them.*/}
+        {messages.map((msg, index) => (
+          <Text
+            key={index}
+            style={msg.type === "user" ? styles.userMessage : styles.gptMessage}
+          >
+            {msg.text}
+          </Text>
+        ))}
+      </ScrollView>
 
-        <Text style={styles.userMessage}>
-          {`Youre response would be here.`}
-        </Text>
-        <Text style={styles.gptMessage}>{`GPT's response would be here.`}</Text>
-              
-        <Text style={styles.userMessage}>
-          {`Youre response...`}
-        </Text>
-
-        {/* Future messages will go here */}
-      </View>
-
-      {/* Simplified input area */}
       <View style={styles.inputWrapper}>
-        <TextInput placeholder="Type a message..." style={styles.textInput} />
-
-        <TouchableOpacity style={styles.sendButton}>
+        <TextInput
+          placeholder="Type a message..."
+          value={inputText}
+          onChangeText={setInputText}
+          style={styles.textInput}
+        />
+        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
           <Text style={styles.sendText}>↑</Text>
         </TouchableOpacity>
       </View>
@@ -73,7 +115,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#555",
     textAlign: "left",
-      marginTop: 20,
+    marginTop: 20,
     marginBottom: 10,
     marginLeft: 10,
   },
