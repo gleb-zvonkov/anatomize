@@ -1,0 +1,31 @@
+{
+  "name": "anatomize",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~54.0.23",
+    "expo-constants": "~18.0.10",
+    "expo-linking": "~8.0.8",
+    "expo-router": "~6.0.14",
+    "expo-status-bar": "~3.0.8",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-dotenv": "^3.4.11",
+    "react-native-markdown-display": "^7.0.2",
+    "react-native-marked": "^7.0.2",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.0",
+    "babel-preset-expo": "^54.0.7",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}

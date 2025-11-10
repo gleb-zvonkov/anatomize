@@ -1,0 +1,340 @@
+// export const summaries: Record<string, string> = {
+//   back: "The back forms the central support structure of the body, housing the vertebral column, spinal cord, and associated muscles. It provides both strength and flexibility, allowing bending, twisting, and maintaining upright posture. The vertebrae protect the spinal cord while supporting the weight of the head and trunk.",
+//   thorax:
+//     "The thorax, or chest, is enclosed by the rib cage, sternum, and thoracic vertebrae. It contains the lungs, heart, and major blood vessels that sustain respiration and circulation. The diaphragm separates it from the abdomen and plays a key role in breathing movements.",
+//   abdomen:
+//     "The abdomen is the region between the thorax and pelvis that contains the digestive organs such as the stomach, intestines, liver, and pancreas. It is a dynamic cavity that supports digestion, absorption, and metabolic regulation. Its wall muscles also assist in posture and protection of internal organs.",
+//   pelvis:
+//     "The pelvis connects the trunk to the lower limbs and provides strong support for the body’s weight during standing and movement. It houses parts of the digestive, urinary, and reproductive systems. Structurally, it protects these organs and transmits forces from the spine to the legs.",
+//   perineum:
+//     "The perineum is the diamond-shaped region forming the pelvic outlet, located between the thighs. It contains muscles and fascia that support the pelvic organs and control urination and defecation. In both sexes, it plays an essential role in reproductive and sexual function.",
+//   upperLimb:
+//     "The upper limb includes the shoulder, arm, forearm, and hand, designed for mobility and precision. It allows grasping, lifting, and manipulation of objects through a wide range of motion. Its muscular and skeletal structure enables fine motor control and sensory feedback for skilled tasks.",
+//   lowerLimb:
+//     "The lower limb includes the hip, thigh, leg, and foot, providing stability and locomotion. It supports the entire body weight during standing and movement. The strong bones, ligaments, and muscles work together to enable walking, running, and balance on uneven surfaces.",
+//   neck: "The neck is the narrow region connecting the head and trunk, containing vital structures such as the trachea, esophagus, and major blood vessels. It supports the head’s mobility and provides passage for nerves and vessels to and from the brain. Muscles of the neck also assist in breathing and posture.",
+//   head: "The head houses the brain, sensory organs, and the openings for the respiratory and digestive tracts. It contains the eyes, ears, nose, and mouth, which mediate sensory perception and communication. The skull protects the brain while providing attachment points for facial and chewing muscles.",
+// };
+
+export const summaries: Record<string, string> = {
+  back: `
+# Back
+The back supports the body and protects the spinal cord. It includes bones, muscles, nerves, and ligaments that allow movement and posture.  
+
+**Vertebral Column**  
+- 33 stacked vertebrae forming the spine  
+- Supports body weight and upright posture  
+- Protects the spinal cord  
+- Allows bending and rotation  
+
+**Muscles**  
+- Move and stabilize the spine  
+- Superficial muscles move the shoulders  
+- Deep muscles keep the back upright  
+- Help with breathing and lifting  
+
+**Nerves**  
+- Spinal nerves exit between vertebrae  
+- Dorsal rami serve the back muscles and skin  
+- Carry signals for movement and sensation  
+
+**Blood Vessels**  
+- Supplied by vertebral and intercostal arteries  
+- Drained by vertebral venous plexuses  
+- Maintain blood flow to spinal tissues  
+
+**Joints and Ligaments**  
+- Small joints guide spinal motion  
+- Ligaments hold vertebrae together  
+- Provide strength and flexibility to the spine
+  `,
+
+  thorax: `
+# Thorax
+The thorax, or chest, protects vital organs of respiration and circulation. It is enclosed by the rib cage and separated from the abdomen by the diaphragm.  
+
+**Bones**  
+- Formed by 12 pairs of ribs, sternum, and thoracic vertebrae  
+- Creates a flexible cage for protection and breathing  
+- Ribs articulate with the vertebrae and sternum  
+- Provides attachment points for muscles of respiration and the upper limb  
+
+**Muscles**  
+- Intercostal muscles lift and lower the ribs during breathing  
+- The diaphragm contracts for inhalation and relaxes for exhalation  
+- Together they control the volume of the thoracic cavity  
+
+**Organs**  
+- Lungs occupy the pleural cavities and enable gas exchange  
+- The heart lies in the mediastinum and pumps blood through the body  
+- The thymus sits in the upper anterior mediastinum and is active in early immunity  
+
+**Vessels**  
+- The aorta carries oxygenated blood from the heart  
+- Pulmonary arteries and veins transport blood between the heart and lungs  
+- The vena cava returns deoxygenated blood to the right atrium  
+
+**Nerves**  
+- Intercostal nerves supply the muscles and skin between ribs  
+- The vagus nerve influences heart rate and digestion  
+- The phrenic nerve controls the diaphragm  
+- The sympathetic trunk regulates thoracic organs and blood vessels  
+
+**Spaces**  
+- Pleural cavities each surround a lung  
+- The mediastinum lies centrally and contains the heart, thymus, trachea, and major vessels  
+
+**Surface Anatomy**  
+- Key landmarks include the sternal angle, clavicles, and costal margins  
+- Reference lines include the midclavicular, midaxillary, and sternal lines  
+- Used for locating rib levels and internal structures during examination  
+`,
+
+  abdomen: `
+# Abdomen  
+The abdomen lies between the thorax and pelvis. It houses organs for digestion, absorption, excretion, and metabolic regulation.  
+
+**Walls and Muscles**  
+- Includes anterior, posterior, and lateral abdominal walls  
+- Layers of muscles support and protect the organs  
+- Contribute to posture, trunk movement, and breathing  
+- Increase internal pressure for actions like coughing or childbirth  
+
+**Peritoneum and Mesenteries**  
+- The peritoneum lines the abdominal cavity and covers organs  
+- The peritoneal cavity contains a small amount of lubricating fluid  
+- Omenta, ligaments, and mesenteries connect and support organs  
+- Provide pathways for vessels, nerves, and lymphatics  
+
+**Organs – Digestive**  
+- The stomach mixes and digests food  
+- The small intestine absorbs nutrients  
+- The large intestine absorbs water and forms feces  
+
+**Organs – Accessory**  
+- The liver processes nutrients and detoxifies blood  
+- The gallbladder stores and releases bile  
+- The pancreas secretes digestive enzymes and hormones  
+
+**Organs – Urinary**  
+- The kidneys filter blood to produce urine  
+- The ureters transport urine to the bladder  
+
+**Vessels**  
+- The abdominal aorta supplies oxygenated blood to the organs  
+- The inferior vena cava returns blood to the heart  
+- The portal vein carries nutrient-rich blood to the liver  
+
+**Nerves**  
+- The sympathetic trunk provides autonomic control of abdominal organs  
+- The vagus nerve carries parasympathetic fibers to the gut  
+- The lumbar plexus supplies motor and sensory innervation to the lower abdomen and limbs  
+
+**Regions and Quadrants**  
+- The abdomen can be divided into nine regions or four quadrants  
+- Used to locate organs and describe pain or pathology  
+- Common landmarks include the umbilicus and costal margins  
+`,
+
+  pelvis: `
+# Pelvis  
+The pelvis forms the lower part of the trunk. It supports the spine, connects the lower limbs, and contains organs for urinary, digestive, and reproductive functions.  
+
+**Bones and Joints**  
+- Formed by the two hip bones, sacrum, and coccyx  
+- The sacroiliac joints connect the spine to the pelvis  
+- The pubic symphysis unites the right and left hip bones  
+- Provides strength and stability for weight transfer to the lower limbs  
+
+**Muscles and Floor**  
+- The pelvic diaphragm consists of the levator ani and coccygeus muscles  
+- Supports pelvic organs and maintains continence  
+- The obturator internus and piriformis line the lateral walls  
+- Muscles assist in posture and movement of the hip and pelvic floor  
+
+**Organs**  
+- The bladder stores urine before elimination  
+- The rectum stores and expels feces  
+- The reproductive organs differ by sex: uterus, vagina, and ovaries in females; prostate, seminal vesicles, and vas deferens in males  
+
+**Vessels**  
+- Supplied by branches of the internal iliac arteries  
+- Drained by the internal iliac veins  
+- Rich vascular network supports pelvic organs and walls  
+
+**Nerves**  
+- The sacral plexus gives rise to major nerves of the lower limb  
+- The pudendal nerve supplies the perineum and external genitalia  
+- Autonomic plexuses regulate bladder, rectal, and reproductive function  
+`,
+
+  perineum: `
+# Perineum  
+The perineum is the diamond-shaped region at the pelvic outlet, located between the thighs. It supports the pelvic organs and contains muscles and structures for urinary, fecal, and reproductive functions.  
+
+**Regions**  
+- Divided into the urogenital triangle (anterior) and anal triangle (posterior)  
+- The urogenital triangle contains openings for the urethra and, in females, the vagina  
+- The anal triangle surrounds the anal canal and sphincters  
+- Bounded by the pubic symphysis, ischial tuberosities, and coccyx  
+
+**Muscles**  
+- Includes perineal muscles that support pelvic organs  
+- External urethral and anal sphincters control urination and defecation  
+- In females, the muscles support the vaginal opening; in males, they assist ejaculation  
+- Contract to maintain continence and aid core stability  
+
+**Organs**  
+- Contains the external genitalia: penis and scrotum in males, vulva in females  
+- The anal canal passes through the anal triangle  
+- Supports structures for elimination and reproduction  
+
+**Vessels and Nerves**  
+- Supplied by the pudendal artery and drained by the pudendal vein  
+- Innervated by the pudendal nerve, which controls sphincters and sensation  
+- Provides motor and sensory supply to the external genitalia and perineal muscles  
+`,
+
+  upperLimb: `
+# Upper Limb  
+The upper limb is specialized for mobility and precision. It allows reaching, grasping, and manipulation of objects through coordinated movement of the shoulder, arm, forearm, and hand.  
+
+**Bones and Joints**  
+- Includes the bones of the shoulder, arm, forearm, and hand  
+- Major joints: shoulder (glenohumeral), elbow, wrist, and small hand joints  
+- Designed for a wide range of motion and fine motor control  
+- Connects to the trunk through the pectoral girdle (clavicle and scapula)  
+
+**Muscles**  
+- Shoulder muscles move and stabilize the arm (deltoid, rotator cuff)  
+- Arm muscles flex and extend the elbow (biceps, triceps)  
+- Forearm muscles control wrist and finger movement  
+- Hand muscles perform precise and coordinated motions  
+
+**Vessels**  
+- Arterial supply from subclavian → axillary → brachial → radial and ulnar arteries  
+- Venous drainage through deep and superficial veins of the same names  
+- Rich collateral circulation maintains blood flow during movement  
+
+**Nerves**  
+- Derived from the brachial plexus (C5–T1)  
+- Major branches: musculocutaneous, median, ulnar, radial, and axillary nerves  
+- Provide motor control and sensory feedback throughout the limb  
+
+**Regions**  
+- Shoulder: connects limb to trunk  
+- Axilla: passage for vessels and nerves  
+- Arm: between shoulder and elbow  
+- Forearm: between elbow and wrist  
+- Hand: specialized for grip and dexterity  
+`,
+
+  lowerLimb: `
+# Lower Limb  
+The lower limb supports body weight and provides movement and balance. It connects the trunk to the ground and is built for strength, stability, and locomotion.  
+
+**Bones and Joints**  
+- Includes the hip bone, femur, tibia, fibula, and bones of the foot  
+- Major joints: hip, knee, ankle, and small foot joints  
+- Designed to bear weight and allow walking, running, and jumping  
+- The pelvis and hip joint connect the limb to the trunk  
+
+**Muscles**  
+- Gluteal muscles extend and stabilize the hip  
+- Thigh muscles control hip and knee movement  
+- Leg muscles move the ankle and toes  
+- Foot muscles maintain arches and balance  
+
+**Vessels**  
+- Arterial supply from the femoral, popliteal, and tibial arteries  
+- Dorsal arteries supply the top of the foot  
+- Venous drainage through deep and superficial veins  
+- Valves in veins assist blood return to the heart  
+
+**Nerves**  
+- Supplied by the lumbar and sacral plexuses  
+- Major nerves: sciatic, femoral, obturator, tibial, and peroneal  
+- Provide motor control and sensation for the entire limb  
+
+**Regions**  
+- Gluteal region: around the hip and buttocks  
+- Thigh: between hip and knee  
+- Leg: between knee and ankle  
+- Foot: supports standing and movement  
+`,
+  
+  neck: `
+# Neck  
+The neck connects the head to the trunk and serves as a passage for air, food, blood vessels, and nerves. It provides support and mobility for the head and protects vital structures.  
+
+**Bones and Muscles**  
+- Formed by the cervical vertebrae and the hyoid bone  
+- The vertebrae support the head and allow movement  
+- Major muscles include the sternocleidomastoid and trapezius  
+- Deep muscles stabilize and flex the cervical spine  
+
+**Vessels and Nerves**  
+- Supplied by the common and internal carotid arteries  
+- Drained by the internal and external jugular veins  
+- The cervical plexus supplies sensation and motor control to the neck and diaphragm  
+- Cranial nerves (especially IX, X, XI, and XII) pass through and supply the neck region  
+
+**Organs**  
+- The larynx produces sound and protects the airway  
+- The pharynx connects the mouth and nasal cavity to the esophagus  
+- The thyroid gland regulates metabolism through hormone secretion  
+
+**Regions**  
+- The anterior triangle contains major vessels, glands, and the airway structures  
+- The posterior triangle contains muscles and nerves passing to the upper limb  
+- These regions are key landmarks for clinical examination and surgery  
+`
+,
+
+  head: `
+# Head  
+The head houses the brain and sensory organs and forms the uppermost part of the body. It supports sight, hearing, smell, taste, and communication through speech and facial expression.  
+
+**Bones and Joints**  
+- Composed of the skull, which protects the brain and sensory organs  
+- The skull bones are joined by immovable sutures  
+- The mandible forms the lower jaw and moves at the temporomandibular joint  
+- Provides attachment for muscles of expression and mastication  
+
+**Muscles**  
+- Muscles of facial expression move the skin for communication  
+- Muscles of mastication control jaw movement for chewing  
+- Extraocular muscles move the eyes within the orbits  
+- Tongue muscles aid in speech, swallowing, and food manipulation  
+
+**Cranial Nerves**  
+- Twelve pairs (I–XII) emerge from the brain  
+- Control vision, hearing, smell, taste, balance, and facial movement  
+- Include key nerves like optic (II), trigeminal (V), facial (VII), and vagus (X)  
+- Coordinate sensory and motor functions of the head and neck  
+
+**Vessels**  
+- Supplied mainly by the carotid and vertebral arteries  
+- Drained by internal and external jugular veins  
+- Rich blood flow supports the brain and sensory organs  
+
+**Organs and Cavities**  
+- Contains the brain within the cranial cavity  
+- Eyes in the orbits, ears in the temporal bones  
+- Nose and nasal cavity for breathing and smell  
+- Mouth and oral cavity for eating and speech  
+
+**Regions**  
+- Face: houses sensory openings and muscles of expression  
+- Scalp: covers the top of the skull  
+- Cranial cavity: encloses the brain  
+- Orbit: contains the eye and associated muscles  
+- Nasal cavity: filters and humidifies air  
+- Oral cavity: forms the entrance to the digestive tract  
+`,
+
+  
+  
+  
+  
+};
