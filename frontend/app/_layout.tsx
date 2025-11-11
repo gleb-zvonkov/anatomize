@@ -1,3 +1,6 @@
+// RootLayout component for Expo Router navigation
+// Dynamic segments like [region] allow region-specific routes (e.g., /chat/thorax).
+// The header is hidden globally, headerShown: false
 import React from "react";
 import { Stack } from "expo-router";
 

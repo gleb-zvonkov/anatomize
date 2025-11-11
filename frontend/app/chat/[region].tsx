@@ -1,6 +1,10 @@
 //TO DO: Store chat history by region using AsyncStorage 
+// ChatScreen.tsx
+// This screen provides an interactive chat interface between the user and a GPT-powered anatomy tutor.
+// It displays the chat history, sends user input to the backend (`/chat` endpoint) for processing, and shows the GPT response.
 
-import React, { useState, useRef, useEffect } from "react";
+
+import React, { useState, useRef, useEffect } from "react"; //hooks we will use 
 import {
   View,
   Text,
@@ -8,27 +12,27 @@ import {
   TextInput,
   StyleSheet,
   ScrollView,
-} from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+} from "react-native"; 
+import { useRouter, useLocalSearchParams } from "expo-router";   //for navigation 
 import {
   SafeAreaView,
   useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { OPENAI_API_KEY } from "@env"; 
-import { regionPrompts } from "../../data/chat_prompts";
+} from "react-native-safe-area-context";  //so doesnt touch notch 
+
 
 export default function ChatScreen() {
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-    const { region } = useLocalSearchParams();
-    const scrollViewRef = useRef<ScrollView>(null);
-  const [isSending, setIsSending] = useState(false);
+
+  const router = useRouter(); //for navigation 
+  const insets = useSafeAreaInsets(); //for the back button
+  const { region } = useLocalSearchParams();   //the current region
+  const scrollViewRef = useRef<ScrollView>(null);  //scroll view refrence, so we can scroll as GPT responds
+  const [isSending, setIsSending] = useState(false);   //flag for sending so user cant send multiple queries at once
   
 
   
   const [inputText, setInputText] = useState(""); //Tracks what the user is typing in the TextInput
   const [messages, setMessages] = useState([
-    { type: "gpt", text: `You're now chatting about the ${region} region.` },
+    { type: "gpt", text: `You're now chatting about the ${region} region. Ask a question.` },
   ]); //Keeps a running list of all messages (both user and GPT).
     const [inputHeight, setInputHeight] = useState(40);   // Dynamic height for TextInput
 

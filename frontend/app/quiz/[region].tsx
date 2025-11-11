@@ -8,7 +8,8 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { quizData, Region } from "../../data/quiz_questions";
+import { quizData} from "../../data/quiz_questions";
+import { Region } from "../../types";    //the region types
 
 export default function QuizScreen() {
   const router = useRouter();

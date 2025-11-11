@@ -1,45 +1,31 @@
-//to do store a large numer of quiz questions in databse and fetch them randomly 
+// This is the backend for our anatomize app. 
+// It sets up an Express server with a single POST endpoint at "/chat".
+// The "/chat" endpoint receives user input and region context ("thorax", "abdomen")
+// It construct a structured prompt
+// It send the structure prompt to OpenAI Chat Completions endpoint
+// It return the GPT model's reply.
 
-import express from "express";
-import fetch from "node-fetch";
-import cors from "cors";
-import dotenv from "dotenv";
-dotenv.config();
+import express from "express";    
+import fetch from "node-fetch";   //Adds fetch() function to Node.js so the backend can make HTTP requests
+import cors from "cors";   // middleware that enables Cross-Origin Resource Sharing
+import dotenv from "dotenv"; // Allows loading environment variables from a .env, specefically the OpenAI API key
+import regionPrompts from "./regionPrompts.js";  //system prompt for different anatomical regions 
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+dotenv.config();  //read .env file that contains OPENAI_API_KEY
+const app = express();   //create Express app
+app.use(express.json()); // middleware that automatically parses incoming JSON request bodies
+app.use(cors()); //enables Cross-Origin Resource Sharing
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY; //get OpenAI API key from environment variables
 
-const regionPrompts = {
-  abdomen:
-    "You are teaching a student about the abdomen. Focus on digestive organs, peritoneum, and major blood vessels, prompting critical thinking.",
-  pelvis:
-    "You are teaching a student about the pelvis. Ask questions and promote discussion about bones, muscles, and reproductive organs.",
-  perineum:
-    "You are teaching a student about the perineum. Guide the student through its regions, muscles, and nerves with interactive dialogue.",
-  upperlimb:
-    "You are teaching a student about the upper limb. Discuss the bones, muscles, and nerves involved in movement and dexterity.",
-  lowerlimb:
-    "You are teaching a student about the lower limb. Emphasize walking mechanics, muscles, and vascular supply, and ask applied questions.",
-  neck: "You are teaching a student about the neck. Discuss triangles, vessels, and muscles while promoting anatomical reasoning.",
-  head: "You are teaching a student about the head. Explore cranial nerves, skull bones, and sensory organs through guided questions.",
-};
-
-app.get("/", (req, res) => {
-  res.send("Backend is running!");
-});
-
-app.post("/chat", async (req, res) => {
-  console.log("Received request:", req.body);
-  const { region, inputText } = req.body;
+app.post("/chat", async (req, res) => {    //chat endpoint 
+  const { region, inputText } = req.body;  //extract region and user input from request body
 
   const systemPrompt =
-    regionPrompts[region] || "You are a helpful anatomy tutor.";
+    regionPrompts[region] || "You are a helpful anatomy tutor.";  //get system prompt for the specified region, or default prompt
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {    //make POST request to OpenAI Chat Completions endpoint
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -54,18 +40,15 @@ app.post("/chat", async (req, res) => {
       }),
     });
 
-    const data = await response.json();
-    console.log("OpenAI response data:", data);
-    const reply = data.choices?.[0]?.message?.content ?? "No reply";
-    console.log("OpenAI reply:", reply);
+    const data = await response.json(); //parse JSON response
+    const reply = data.choices?.[0]?.message?.content ?? "Error getting GPT Reply";   //get the model's reply or default message
+    res.json({ reply }); //send reply back to client as json 
 
-    res.json({ reply });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error contacting OpenAI API" });
+    console.error(err);   //log error to console
+    res.status(500).json({ error: "Error contacting OpenAI API" }); //send 500 error response
   }
 });
 
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 3000;  //use port from environment or default to 3000
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); //start server and log port number

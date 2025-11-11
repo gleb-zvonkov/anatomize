@@ -1,113 +1,120 @@
-import React, { useState } from "react";
+/*
+ Anatomize App - Home Screen
+ This screen displays a list of all body regions (Back, Thorax, Abdomen...)
+ Each list item is a card witth an image and lablel for the region.
+ When a region card is tapped, it expands to show three buttons:
+  1. Summary - navigates to the summary screen for that region
+  2. Chat - navigates to the chat screen for that region
+  3. Quiz - navigates to the quiz screen for that region
+*/
+
+import React from "react";  
 import {
   Text,
-  StyleSheet,
+  StyleSheet,      // for styling component
   TouchableOpacity, //a pressable component that fades on press
   FlatList, //scrollable list for rendering many items
   Image, //for the images of each region
   View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context"; //ensure content goes past notch
-import { useRouter } from "expo-router";
+import { useState } from "react"; //useState for managing selected region state 
+import { SafeAreaView } from "react-native-safe-area-context"; //ensure content doesnt goes past notch
+import { useRouter } from "expo-router";  //for navigation between screens
+import { Region } from "../types"; // Define the type of regions, tells TypeScript that valid values are only those specific strings
 
-
-
-
-type RegionName =
-  | "back"
-  | "thorax"
-  | "abdomen"
-  | "pelvis"
-  | "perineum"
-  | "upperLimb"
-  | "lowerLimb"
-  | "neck"
-  | "head";
-
-// Array of region identifiers
-const regions = [
+// Array of region identifiers and labels that will be displayed 
+const regions: { key: Region; label: string }[] = [
   { key: "back", label: "Back" },
   { key: "thorax", label: "Thorax" },
   { key: "abdomen", label: "Abdomen" },
   { key: "pelvis", label: "Pelvis" },
   { key: "perineum", label: "Perineum" },
-  { key: "upperLimb", label: "Upper Limb" },
-  { key: "lowerLimb", label: "Lower Limb" },
+  { key: "upperlimb", label: "Upper Limb" },
+  { key: "lowerlimb", label: "Lower Limb" },
   { key: "neck", label: "Neck" },
   { key: "head", label: "Head" },
 ];
 
-// Image mapping for each region
-const regionImages: Record<RegionName, any> = {
+// Images for each region 
+const regionImages: Record<Region, any> = {
   back: require("../region_images/back.png"),
   thorax: require("../region_images/thorax.png"),
   abdomen: require("../region_images/abdomen.png"),
   pelvis: require("../region_images/pelvis.png"),
   perineum: require("../region_images/perineum.png"),
-  upperLimb: require("../region_images/upper_limb.png"),
-  lowerLimb: require("../region_images/lower_limb.png"),
+  upperlimb: require("../region_images/upper_limb.png"),
+  lowerlimb: require("../region_images/lower_limb.png"),
   neck: require("../region_images/neck.png"),
   head: require("../region_images/head.png"),
 };
 
+// Icons for summary, chat, and quiz buttons
 const summaryIcon = require("../screen_images/summary.png");
 const chatIcon = require("../screen_images/chat.png");
 const quizIcon = require("../screen_images/quiz.png");
 
+// HomeScreen component
+export default function HomeScreen() {
+  const router = useRouter(); //for navigating to different screens
 
-export default function Index() {
-  const router = useRouter();
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null); // tracks which region is currently expanded
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      {/* Edges top gets rid of the bottom area */}
-      {/*Touchable Opacity nested inside of toubable opacity, this may cause an issue, so far seems fine*/}
+      {/* Edges top gets rid of the bottom safe area */}
       <FlatList
-        data={regions}
-        keyExtractor={(item) => item.key}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            activeOpacity={1} 
-            style={styles.item}
-            onPress={() => setSelectedRegion(item.key)}
+        data={regions} // each flatlist item is a region
+        keyExtractor={(item) => item.key} //unique key for each item
+        renderItem={(
+          { item } // For each region render:
+        ) => (
+          <TouchableOpacity // a gray card for each region
+            activeOpacity={1} // no fade effect on press
+            style={styles.card} // styling for the card
+            onPress={() => setSelectedRegion(item.key)} //set selected region on press
           >
             <View style={styles.row}>
+              {/* row with region image and label */}
               <Image
-                source={regionImages[item.key as RegionName]}
-                style={styles.icon}
+                source={regionImages[item.key as Region]} //region image
+                style={styles.regionImage} //styling for the image
               />
-              <Text style={styles.label}>{item.label}</Text>
+              <Text style={styles.regionLabel}>{item.label}</Text>
+              {/* region label */}
             </View>
 
-            {selectedRegion === item.key && (
-              <View style={styles.iconRow}>
+            {selectedRegion === item.key && ( // if this region is selected, show the summary, chat, quiz buttons
+              <View style={styles.hiddenRow}>
                 <TouchableOpacity
-                  onPress={() => router.push(`/summary/${item.key}`)}
-                  style={styles.buttonCard}
+                  onPress={() => router.push(`/summary/${item.key}`)} //navigate to summary screen for this region
+                  style={styles.activityButton}
                 >
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Image source={summaryIcon} style={styles.smallIcon} />
-                    <Text>Summary</Text>
+                  {/* Inner layout for icon + text alignment */}
+                  <View style={styles.innerActivityButton}>
+                    <Image
+                      source={summaryIcon} // icon for summary
+                      style={styles.activityIcon} //styling for the icon
+                    />
+                    <Text>Summary</Text> 
                   </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => router.push(`/chat/${item.key}`)}
-                  style={styles.buttonCard}
+                  onPress={() => router.push(`/chat/${item.key}`)} //navigate to chat screen for this region
+                  style={styles.activityButton}
                 >
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Image source={chatIcon} style={styles.smallIcon} />
+                  <View style={styles.innerActivityButton}>
+                    <Image source={chatIcon} style={styles.activityIcon} />
                     <Text>Chat</Text>
                   </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => router.push(`/quiz/${item.key}`)}
-                  style={styles.buttonCard}
+                  onPress={() => router.push(`/quiz/${item.key}`)} //navigate to quiz screen for this region
+                  style={styles.activityButton}
                 >
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Image source={quizIcon} style={styles.smallIcon} />
+                  <View style={styles.innerActivityButton}>
+                    <Image source={quizIcon} style={styles.activityIcon} />
                     <Text>Quiz</Text>
                   </View>
                 </TouchableOpacity>
@@ -120,62 +127,59 @@ export default function Index() {
   );
 }
 
-
-
-
-
+//styling for the components
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
   },
-  item: {
-    marginVertical: 8,
-    marginHorizontal: 16,
-    backgroundColor: "#e0e0e0",
-    borderRadius: 15,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
+  card: {    //styling for each region card
+    marginVertical: 8,  // vertical margin between cards
+    marginHorizontal: 16,  // so there is space on left and right
+    backgroundColor: "#e0e0e0",   
+    borderRadius: 15,  // rounded corners
+    padding: 20,  // padding inside the card
   },
-  row: {
+  row: {  //row inside each region card 
     flexDirection: "row",
     alignItems: "center", // centers vertically
   },
-  icon: {
+  regionImage: {  //styling for region images
     width: 50,
     height: 50,
-    marginRight: 15,
-    resizeMode: "contain",
+    marginRight: 15,   
   },
-  label: {
+  regionLabel: {   //styling for region labels
     fontSize: 20,
-    fontWeight: "500",
+    fontWeight: "500",   
   },
-  smallIcon: {
-    width: 30,
-    height: 30,
-    marginHorizontal: 8,
-    resizeMode: "contain",
-  },
-  iconRow: {
+  hiddenRow: {   //styling for the row that contains summary, chat, quiz buttons
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 30,
   },
-  buttonCard: {
+  activityButton: {  //styling for each of the summary, chat, quiz buttons
     backgroundColor: "#fff",
     paddingVertical: 8,
     paddingRight: 10,
     paddingLeft: 2,
-    borderRadius: 10,
+    borderRadius: 10,   //round corners
     marginHorizontal: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 2 },  //add a shdaown effect 
     shadowOpacity: 0.2,
     shadowRadius: 3,
-    elevation: 3, // Android shadow
     flexDirection: "row",
     alignItems: "center",
+  },
+  innerActivityButton: { // inner layout for icon + text alignment
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  activityIcon: {  //styling for summary, chat, quiz icons  
+    width: 30,
+    height: 30,
+    marginHorizontal: 8,
   },
 });
 
