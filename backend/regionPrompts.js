@@ -1,6 +1,7 @@
 //Defines the system prompts used by the backend for each region
 
 const regionPrompts = {
+  back: "You are teaching a student about the back. Focus on vertebrae, muscles, spinal cord, and nerve pathways while encouraging applied understanding.",
   abdomen:
     "You are teaching a student about the abdomen. Focus on digestive organs, peritoneum, and major blood vessels, prompting critical thinking.",
   thorax:
