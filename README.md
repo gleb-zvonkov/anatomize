@@ -54,7 +54,6 @@ To start the backend
 cd backend 
 npm install
 create an .env file with OPENAI_API_KEY 
-npm install -g nodemon
 npm run dev   
 ```
 
