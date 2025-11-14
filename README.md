@@ -3,6 +3,12 @@
 
 Anatomize is an interactive anatomy learning app built with React Native (Expo) and a Node.js + Express backend. It combines structured anatomy summaries, interactive quizzes, and a GPT-powered chat tutor to support medical and life-science students.
 
+## To Do
+1. Implement checkmark for using chat function for 3 messages. 
+2. Store more quiz questions in the backend, retrieve them in frontend when online. 
+3. Add more custom animation? 
+4. Deploy.  
+
 ## Team Information
 Gleb Zvonkov, gleb.zvonkov@mail.utoronto.ca  
 Ian Lee, ianx.lee@mail.utoronto.ca
@@ -102,6 +108,19 @@ Expo Notifications request permissions on launch and dispatch a local alert when
 Backend built with Node.js + Express.         
 Integrated with the OpenAI API for GPT-based tutoring responses.      
 Uses fetch() on the frontend to send chat data and receive AI-generated replies.
+
+#### Advanced Feature 1: Custom Animations 
+React Native’s Animated API in Quiz.
+
+### Advanced Feature 2: Integration with External Services
+Use OpenAI api.
+
+### Advanced Feature 3: Gamification
+Progress tracking on each screen.
+Global progress tracking on home screen. 
+
+### Advanced Feature 3: Offline Support
+Save past GPT conversations in chat screen to view offline. 
 
 #### Deployment
 Documented Expo Publish / EAS build workflow (requires Expo credentials).
