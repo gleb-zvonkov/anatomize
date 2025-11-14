@@ -3,8 +3,15 @@
 // It fetches the `region` parameter from the route.
 // It retrieves the regions markdown-formatted text from `data/summaries`, and renders it inside a scrollable view.
 
-import React from "react";
-import { Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import React, { useCallback } from "react";
+import {
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router"; //for routing
 import {
   SafeAreaView,
@@ -13,11 +20,31 @@ import {
 import Markdown from "react-native-markdown-display"; //renders text in markdown
 import { summaries } from "../../data/summaries"; // the summaries we will print
 import { Region } from "../../types"; //region types for typescript
+import { useAppState } from "../../context/AppStateContext";
 
 export default function SummaryScreen() {
   const router = useRouter(); //router
   const insets = useSafeAreaInsets(); //contains space from the top notch
   const { region } = useLocalSearchParams(); //get the current region
+  const regionParam = Array.isArray(region) ? region[0] : region;
+  const regionKey = (regionParam ?? "back") as Region;
+  const { dispatch, state } = useAppState();
+  const summaryComplete = state.progress[regionKey]?.summaryRead;
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (summaryComplete) return;
+      const { layoutMeasurement, contentOffset, contentSize } =
+        event.nativeEvent;
+      const isAtBottom =
+        layoutMeasurement.height + contentOffset.y >=
+        contentSize.height - 40;
+      if (isAtBottom) {
+        dispatch({ type: "MARK_SUMMARY_READ", region: regionKey });
+      }
+    },
+    [dispatch, regionKey, summaryComplete]
+  );
 
   return (
     // Ensures content stays within safe screen boundaries (avoids notch or home indicator)
@@ -31,11 +58,18 @@ export default function SummaryScreen() {
       </TouchableOpacity>
 
       {/* Scrollable area for long text content */}
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
         {/* Renders markdown-formatted summary text*/}
         <Markdown style={{ body: { fontSize: 18 } }}>
-          {summaries[region as Region] ?? "No summary available."}
+          {summaries[regionKey] ?? "No summary available."}
         </Markdown>
+        {summaryComplete && (
+          <Text style={styles.completionText}>Summary completed ✓</Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -61,5 +95,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#555",
     lineHeight: 24, //so theres space between lines
+  },
+  completionText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: "#2d8a34",
+    fontWeight: "600",
   },
 });

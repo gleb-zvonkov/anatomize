@@ -21,32 +21,8 @@ import { useState } from "react"; //useState for managing selected region state
 import { SafeAreaView } from "react-native-safe-area-context"; //ensure content doesnt goes past notch
 import { useRouter } from "expo-router";  //for navigation between screens
 import { Region } from "../types"; // Define the type of regions, tells TypeScript that valid values are only those specific strings
-
-// Array of region identifiers and labels that will be displayed 
-const regions: { key: Region; label: string }[] = [
-  { key: "back", label: "Back" },
-  { key: "thorax", label: "Thorax" },
-  { key: "abdomen", label: "Abdomen" },
-  { key: "pelvis", label: "Pelvis" },
-  { key: "perineum", label: "Perineum" },
-  { key: "upperlimb", label: "Upper Limb" },
-  { key: "lowerlimb", label: "Lower Limb" },
-  { key: "neck", label: "Neck" },
-  { key: "head", label: "Head" },
-];
-
-// Images for each region 
-const regionImages: Record<Region, any> = {
-  back: require("../region_images/back.png"),
-  thorax: require("../region_images/thorax.png"),
-  abdomen: require("../region_images/abdomen.png"),
-  pelvis: require("../region_images/pelvis.png"),
-  perineum: require("../region_images/perineum.png"),
-  upperlimb: require("../region_images/upper_limb.png"),
-  lowerlimb: require("../region_images/lower_limb.png"),
-  neck: require("../region_images/neck.png"),
-  head: require("../region_images/head.png"),
-};
+import { REGION_ITEMS, regionImages } from "../constants/regions";
+import { useAppState } from "../context/AppStateContext";
 
 // Icons for summary, chat, and quiz buttons
 const summaryIcon = require("../screen_images/summary.png");
@@ -56,14 +32,23 @@ const quizIcon = require("../screen_images/quiz.png");
 // HomeScreen component
 export default function HomeScreen() {
   const router = useRouter(); //for navigating to different screens
+  const { state, isHydrated } = useAppState();
 
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null); // tracks which region is currently expanded
+
+  if (!isHydrated) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading progress…</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Edges top gets rid of the bottom safe area */}
       <FlatList
-        data={regions} // each flatlist item is a region
+        data={REGION_ITEMS} // each flatlist item is a region
         keyExtractor={(item) => item.key} //unique key for each item
         renderItem={(
           { item } // For each region render:
@@ -75,6 +60,42 @@ export default function HomeScreen() {
           >
             <View style={styles.row}>
               {/* row with region image and label */}
+              <View style={styles.statusColumn}>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    state.progress[item.key as Region].summaryRead &&
+                      styles.statusBadgeComplete,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusBadgeText,
+                      state.progress[item.key as Region].summaryRead &&
+                        styles.statusBadgeTextComplete,
+                    ]}
+                  >
+                    {state.progress[item.key as Region].summaryRead ? "✓" : "S"}
+                  </Text>
+                </View>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    state.progress[item.key as Region].quizComplete &&
+                      styles.statusBadgeComplete,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusBadgeText,
+                      state.progress[item.key as Region].quizComplete &&
+                        styles.statusBadgeTextComplete,
+                    ]}
+                  >
+                    {state.progress[item.key as Region].quizComplete ? "✓" : "Q"}
+                  </Text>
+                </View>
+              </View>
               <Image
                 source={regionImages[item.key as Region]} //region image
                 style={styles.regionImage} //styling for the image
@@ -144,6 +165,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center", // centers vertically
   },
+  statusColumn: {
+    marginRight: 10,
+    alignItems: "center",
+  },
+  statusBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#b0b0b0",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  statusBadgeComplete: {
+    backgroundColor: "#4CAF50",
+    borderColor: "#4CAF50",
+  },
+  statusBadgeText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#444",
+  },
+  statusBadgeTextComplete: {
+    color: "#fff",
+  },
   regionImage: {  //styling for region images
     width: 50,
     height: 50,
@@ -181,5 +228,14 @@ const styles = StyleSheet.create({
     height: 30,
     marginHorizontal: 8,
   },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#444",
+  },
 });
-
