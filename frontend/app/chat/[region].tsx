@@ -56,7 +56,7 @@ export default function ChatScreen() {
   const { state } = useAppState();
   const notificationsEnabled = state.notificationsGranted;
   const isScreenActiveRef = useRef(true);
-  const topContentPadding = insets.top + 50;
+  const topContentPadding = 0 ;
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true }); //everyitme a message is added scroll to the end
@@ -335,14 +335,13 @@ export default function ChatScreen() {
   };
 
   return (
-    //keep layout within safe area, avoid notch
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={insets.top + 60}
+        keyboardVerticalOffset={insets.top}
       >
-        {/* Back button to return to home screen */}
+        {/* Back button at very top */}
         <TouchableOpacity
           onPress={() => router.back()}
           style={[styles.backButton, { top: insets.top }]}
@@ -350,12 +349,12 @@ export default function ChatScreen() {
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
 
-        {/* Scrollable area for chat messages */}
+        {/* Chat messages below the back button */}
         <ScrollView
           style={styles.messagesContainer}
           contentContainerStyle={[
             styles.messagesContent,
-            { paddingTop: topContentPadding },
+            { paddingTop: insets.top + 40 }, // space for back button
           ]}
           keyboardShouldPersistTaps="handled"
           ref={scrollViewRef}
@@ -363,7 +362,6 @@ export default function ChatScreen() {
             scrollViewRef.current?.scrollToEnd({ animated: true })
           }
         >
-          {/* Loop through all messages and display them.*/}
           {isLoadingHistory ? (
             <Text style={styles.loadingText}>Loading previous chats…</Text>
           ) : (
@@ -372,7 +370,7 @@ export default function ChatScreen() {
                 key={index}
                 style={
                   msg.type === "user" ? styles.userMessage : styles.gptMessage
-                } //user messaged on the right, gpt on the left
+                }
               >
                 {msg.text}
               </Text>
@@ -380,14 +378,16 @@ export default function ChatScreen() {
           )}
         </ScrollView>
 
+        {/* Input row */}
         <View style={styles.inputContainer}>
-          {/* Input box dynamically resizes based on input height */}
-          <View style={[styles.inputRow, { height: Math.max(50, inputHeight) }]}>
+          <View
+            style={[styles.inputRow, { height: Math.max(50, inputHeight) }]}
+          >
             <TextInput
-              placeholder="Type a message..." // hint text before typing
+              placeholder="Type a message..."
               value={inputText}
-              onChangeText={setInputText} // updates state as user types
-              multiline // allows multiple line
+              onChangeText={setInputText}
+              multiline
               onContentSizeChange={(e) =>
                 setInputHeight(Math.min(e.nativeEvent.contentSize.height, 300))
               }
@@ -400,7 +400,7 @@ export default function ChatScreen() {
                 (isSending || isLoadingHistory) && { opacity: 0.4 },
               ]}
               onPress={handleSend}
-              disabled={isSending || isLoadingHistory} //prevent double sending
+              disabled={isSending || isLoadingHistory}
             >
               <Text style={styles.sendText}>↑</Text>
             </TouchableOpacity>
@@ -409,6 +409,7 @@ export default function ChatScreen() {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+
 }
 
 const styles = StyleSheet.create({
@@ -423,19 +424,18 @@ const styles = StyleSheet.create({
   backButton: {
     position: "absolute",
     left: 20,
-    zIndex: 10,
+    zIndex: 100,
   },
 
   backArrow: {
-    fontSize: 24,
+    fontSize: 28,
   },
 
   messagesContainer: {
     flex: 1,
-    paddingTop: 20, // space for back button
     paddingHorizontal: 10,
-    backgroundColor: "#fff",
   },
+
   messagesContent: {
     paddingBottom: 30,
   },
@@ -502,3 +502,4 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
 });
+

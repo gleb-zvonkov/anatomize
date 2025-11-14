@@ -160,8 +160,12 @@ export default function QuizScreen() {
             {/* Show feedback text, "Correct" or "Incorrect" plus explanation */}
             <Text style={styles.explanation}>
               {selectedAnswer === question.answer
-                ? `Correct. ${question.explanation}`
-                : `Incorrect. ${question.explanation}`}
+                ? `Correct. ${question.explanation} Current score: ${
+                    regionProgress?.quizCorrectCount ?? 0
+                  }/3.`
+                : `Incorrect. ${question.explanation} Current score: ${
+                    regionProgress?.quizCorrectCount ?? 0
+                  }/3.`}
             </Text>
 
             {/* Button to load a new random question */}
@@ -178,14 +182,14 @@ export default function QuizScreen() {
             </TouchableOpacity>
           </>
         )}
-        <View style={styles.progressRow}>
-          <Text style={styles.progressText}>
-            Correct answers: {regionProgress?.quizCorrectCount ?? 0}/3
-          </Text>
-          {regionProgress?.quizComplete && (
-            <Text style={styles.progressComplete}>Quiz mastered ✓</Text>
-          )}
-        </View>
+        {selectedAnswer && (
+          <View style={styles.progressRow}>
+
+            {regionProgress?.quizComplete && (
+              <Text style={styles.progressComplete}>Quiz mastered ✓</Text>
+            )}
+          </View>
+        )}
       </Animated.View>
     </SafeAreaView>
   );

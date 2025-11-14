@@ -60,7 +60,15 @@ export default function HomeScreen() {
           >
             <View style={styles.row}>
               {/* row with region image and label */}
-              <View style={styles.statusColumn}>
+              <View style={styles.leftGroup}>
+                <Image
+                  source={regionImages[item.key as Region]} //region image
+                  style={styles.regionImage} //styling for the image
+                />
+                <Text style={styles.regionLabel}>{item.label}</Text>
+              </View>
+
+              <View style={styles.statusRow}>
                 <View
                   style={[
                     styles.statusBadge,
@@ -75,7 +83,7 @@ export default function HomeScreen() {
                         styles.statusBadgeTextComplete,
                     ]}
                   >
-                    {state.progress[item.key as Region].summaryRead ? "✓" : "S"}
+                    {state.progress[item.key as Region].summaryRead ? "✓" : ""}
                   </Text>
                 </View>
                 <View
@@ -92,15 +100,15 @@ export default function HomeScreen() {
                         styles.statusBadgeTextComplete,
                     ]}
                   >
-                    {state.progress[item.key as Region].quizComplete ? "✓" : "Q"}
+                    {state.progress[item.key as Region].quizComplete ? "✓" : ""}
                   </Text>
                 </View>
+
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusBadgeText}></Text>
+                </View>
+                
               </View>
-              <Image
-                source={regionImages[item.key as Region]} //region image
-                style={styles.regionImage} //styling for the image
-              />
-              <Text style={styles.regionLabel}>{item.label}</Text>
               {/* region label */}
             </View>
 
@@ -116,7 +124,7 @@ export default function HomeScreen() {
                       source={summaryIcon} // icon for summary
                       style={styles.activityIcon} //styling for the icon
                     />
-                    <Text>Summary</Text> 
+                    <Text>Summary</Text>
                   </View>
                 </TouchableOpacity>
 
@@ -154,20 +162,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  card: {    //styling for each region card
-    marginVertical: 8,  // vertical margin between cards
-    marginHorizontal: 16,  // so there is space on left and right
-    backgroundColor: "#e0e0e0",   
-    borderRadius: 15,  // rounded corners
-    padding: 20,  // padding inside the card
+  card: {
+    //styling for each region card
+    marginVertical: 8, // vertical margin between cards
+    marginHorizontal: 16, // so there is space on left and right
+    backgroundColor: "#e0e0e0",
+    borderRadius: 15, // rounded corners
+    padding: 20, // padding inside the card
   },
-  row: {  //row inside each region card 
+  row: {
+    //row inside each region card
     flexDirection: "row",
     alignItems: "center", // centers vertically
+    justifyContent: "space-between",
   },
-  statusColumn: {
-    marginRight: 10,
+  statusRow: {
+    flexDirection: "row",
     alignItems: "center",
+    marginLeft: 15,
   },
   statusBadge: {
     width: 28,
@@ -178,6 +190,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 4,
+    marginRight: 8,
   },
   statusBadgeComplete: {
     backgroundColor: "#4CAF50",
@@ -191,39 +204,49 @@ const styles = StyleSheet.create({
   statusBadgeTextComplete: {
     color: "#fff",
   },
-  regionImage: {  //styling for region images
+  leftGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  regionImage: {
+    //styling for region images
     width: 50,
     height: 50,
-    marginRight: 15,   
+    marginRight: 15,
   },
-  regionLabel: {   //styling for region labels
+  regionLabel: {
+    //styling for region labels
     fontSize: 20,
-    fontWeight: "500",   
+    fontWeight: "500",
   },
-  hiddenRow: {   //styling for the row that contains summary, chat, quiz buttons
+  hiddenRow: {
+    //styling for the row that contains summary, chat, quiz buttons
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 30,
   },
-  activityButton: {  //styling for each of the summary, chat, quiz buttons
+  activityButton: {
+    //styling for each of the summary, chat, quiz buttons
     backgroundColor: "#fff",
     paddingVertical: 8,
     paddingRight: 10,
     paddingLeft: 2,
-    borderRadius: 10,   //round corners
+    borderRadius: 10, //round corners
     marginHorizontal: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },  //add a shdaown effect 
+    shadowOffset: { width: 0, height: 2 }, //add a shdaown effect
     shadowOpacity: 0.2,
     shadowRadius: 3,
     flexDirection: "row",
     alignItems: "center",
   },
-  innerActivityButton: { // inner layout for icon + text alignment
+  innerActivityButton: {
+    // inner layout for icon + text alignment
     flexDirection: "row",
     alignItems: "center",
   },
-  activityIcon: {  //styling for summary, chat, quiz icons  
+  activityIcon: {
+    //styling for summary, chat, quiz icons
     width: 30,
     height: 30,
     marginHorizontal: 8,
