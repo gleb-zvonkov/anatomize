@@ -23,17 +23,20 @@ Understanding human anatomy can be overwhelming due to the large amount of memor
 | **Navigation** | Expo Router |
 | **Backend** | Node.js + Express  |
 | **AI Integration** | OpenAI API  |
-| **State Management** | **TO DO:** add useReducer for global state for a checkmarks that appear when summary, quiz completed |
-| **Persistence** | **TO DO:** implement React Native AsyncStorage for persisting chat history |
-| **Notifications** | **TO DO:** integrate Expo Notifications for daily study reminders |
+| **State Management** | Context + useReducer (region progress + notification permissions) |
+| **Persistence** | AsyncStorage for chat history and progress |
+| **Notifications** | Expo Notifications for local tutor-reply alerts |
 | **Styling** | React Native `StyleSheet` |
-| **Deployment** |  **TO DO:** finalize EAS Build and generate APK/Expo link |
+| **Deployment** |  Expo / EAS (see Deployment section) |
 
 ## Features
 - **Home Screen:** Displays all anatomical regions (Back, Thorax, Abdomen, ...)  
-- **Summaries:** Markdown-based content explaining regional anatomy.  
+- **Summaries:** Markdown-based content explaining regional anatomy with automatic “read” tracking.  
 - **Chat Tutor:** GPT-powered interactive dialogue for each region.  
-- **Quizzes:** Multiple-choice questions with explanations and animations. 
+- **Chat History Persistence:** Region-specific conversations are saved locally so you can resume later.  
+- **Quizzes:** Multiple-choice questions with explanations and animations plus mastery tracking (3 correct answers). 
+- **Progress Badges:** Summary/quiz completion checkmarks appear on each region card.  
+- **Notifications:** Local alerts fire when new tutor replies arrive (requires user permission). 
 
 ## User Guide
 - **Home Screen:** Tap an anatomical region to expand available modes *Summary*, *Chat*, *Quiz*.  
@@ -57,17 +60,20 @@ create an .env file with OPENAI_API_KEY
 npm run dev   
 ```
 
+### Environment variables
+- `backend/.env` &rarr; `OPENAI_API_KEY=<your OpenAI key>`  
+- `frontend` &rarr; create (or extend) `app.config.js`/shell env with `EXPO_PUBLIC_API_URL=https://your-backend-host` so the mobile app knows where to send chat requests.
+
 ## Deployment Information
-TODO
+See `DEPLOYMENT.md` for step-by-step frontend (Expo Publish / EAS) and backend hosting instructions. Actual publishing requires access to your Expo account and production backend credentials, so the repo only contains the documented process.
 
 ## Individual Contributions
 Gleb developed the core frontend components using Expo Router.   
 Gleb built the backend server.    
 Gleb integrated the OpenAI API.   
-Ian implemented state management to show a checkmark beside the region  that a summary was read and another checkmark when the 3 quiz questions are correctly completed. The checkmarks are on the region in the homescreen (index.tsx).   
-Ian added persistent chat history.    
-Ian set up notifications.     
-Ian deployed the app.     
+Ian implemented global progress tracking with useReducer to show summary/quiz completion checkmarks on the home screen.   
+Ian added persistent chat history per region and wired Expo Notifications for tutor reply alerts.    
+Ian documented the deployment plan and test matrix.     
 
 ## Lesson Learned
 TODO
@@ -86,11 +92,11 @@ Implemented with Expo Router using file-based routing in the /app directory.
 Dynamic routes like [region].tsx handle navigation between anatomical regions.
 
 #### State Management and Persistence
-TO DO: Use useReducer to manage state (region checkmarks).      
-TO DO: Add AsyncStorage to persist chat history across app restarts.
+Uses Context + useReducer to track summary/quiz completion per region (with persistence).      
+Chat history is saved in AsyncStorage so conversations survive app restarts.
 
 #### Notifications
-TO DO: Implement Expo Notifications for daily study reminders.
+Expo Notifications request permissions on launch and dispatch a local alert whenever a new tutor reply finishes streaming.
 
 #### Backend Integration
 Backend built with Node.js + Express.         
@@ -98,10 +104,13 @@ Integrated with the OpenAI API for GPT-based tutoring responses.
 Uses fetch() on the frontend to send chat data and receive AI-generated replies.
 
 #### Deployment
-TO DO: Deploy using Expo EAS Build and provide APK or Expo Go link.
+Documented Expo Publish / EAS build workflow (requires Expo credentials).
 
 #### Advanced Features
-TO DO
+- Region progress visualization with dual checkmarks.  
+- Persistent GPT chat with animated type-out effect.  
+- Quiz mastery tracking (requires three correct answers per region).  
+- Local tutor reply notifications.
 
 ## Project Structure
 ├── backend/ # Node.js + Express REST API
@@ -120,6 +129,5 @@ TO DO
 │ ├── screen_images/ # summary, gpt, quiz icons
 │
 └── types.ts # contains TypeScript type region 
-
 
 

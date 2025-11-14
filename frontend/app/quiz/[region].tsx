@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -13,16 +13,36 @@ import {
 } from "react-native-safe-area-context"; //so doesn't touch notch
 import { quizData } from "../../data/quiz_questions"; //quiz questions
 import { Region } from "../../types"; //region type
+import { useAppState } from "../../context/AppStateContext";
+
+const shuffleIndices = (size: number) => {
+  const indices = Array.from({ length: size }, (_, idx) => idx);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  return indices;
+};
 
 export default function QuizScreen() {
   const router = useRouter();
   const { region } = useLocalSearchParams(); //current region
+  const regionParam = Array.isArray(region) ? region[0] : region;
+  const regionKey = (regionParam ?? "back") as Region;
   const insets = useSafeAreaInsets();
-  const questions = quizData[region as Region] || []; //get quiz questions for the current region
+  const questions = quizData[regionKey] || []; //get quiz questions for the current region
+  const regenerateQueue = useCallback(
+    () => shuffleIndices(questions.length),
+    [questions.length]
+  );
+  const initialQueue = useMemo(() => regenerateQueue(), [regenerateQueue]);
+  const [questionQueue, setQuestionQueue] = useState<number[]>(initialQueue);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
-    questions.length > 0 ? Math.floor(Math.random() * questions.length) : 0 // random first question
+    initialQueue[0] ?? 0
   );
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null); // the answer the user selects
+  const { state, dispatch } = useAppState();
+  const regionProgress = state.progress[regionKey];
   const question = questions[currentQuestionIndex] || {
     //the current question and a default one incase of issue
     text: "No quiz available for this region.",
@@ -32,6 +52,12 @@ export default function QuizScreen() {
   };
 
   const fadeAnim = useRef(new Animated.Value(1)).current; // fade animation value
+
+  useEffect(() => {
+    setQuestionQueue(initialQueue);
+    setCurrentQuestionIndex(initialQueue[0] ?? 0);
+    setSelectedAnswer(null);
+  }, [initialQueue, regionKey]);
 
   // fade in/out animations
   //smoothly animates opacity from its current value to 1 over 300 ms, making the view fade in
@@ -54,15 +80,18 @@ export default function QuizScreen() {
     });
   };
 
-  // helper to get next question randomly 
-  const getRandomIndex = () => {
-    if (questions.length <= 1) return 0;  
-    let next = currentQuestionIndex;
-    while (next === currentQuestionIndex) {    //repeaddly get a random one until its not the same as current
-      next = Math.floor(Math.random() * questions.length);
-    }
-    return next;
-  };
+  const advanceQuestion = useCallback(() => {
+    setQuestionQueue((prev) => {
+      if (prev.length <= 1) {
+        const reshuffled = regenerateQueue();
+        setCurrentQuestionIndex(reshuffled[0] ?? 0);
+        return reshuffled;
+      }
+      const [, ...rest] = prev;
+      setCurrentQuestionIndex(rest[0]);
+      return rest;
+    });
+  }, [regenerateQueue]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -96,7 +125,16 @@ export default function QuizScreen() {
               key={opt}
               style={[styles.option, { backgroundColor }]} //unique background colour
               disabled={!!selectedAnswer} //disable input after selection
-              onPress={() => setSelectedAnswer(opt)} //select the option
+              onPress={() => {
+                setSelectedAnswer(opt); //select the option
+                if (!selectedAnswer && isCorrect) {
+                  dispatch({
+                    type: "INCREMENT_QUIZ_CORRECT",
+                    region: regionKey,
+                    questionId: question.text,
+                  });
+                }
+              }}
             >
               <Text
                 style={[
@@ -132,7 +170,7 @@ export default function QuizScreen() {
               onPress={() => {
                 fadeOut(() => {
                   setSelectedAnswer(null);
-                  setCurrentQuestionIndex(getRandomIndex());
+                  advanceQuestion();
                 });
               }}
             >
@@ -140,6 +178,14 @@ export default function QuizScreen() {
             </TouchableOpacity>
           </>
         )}
+        <View style={styles.progressRow}>
+          <Text style={styles.progressText}>
+            Correct answers: {regionProgress?.quizCorrectCount ?? 0}/3
+          </Text>
+          {regionProgress?.quizComplete && (
+            <Text style={styles.progressComplete}>Quiz mastered ✓</Text>
+          )}
+        </View>
       </Animated.View>
     </SafeAreaView>
   );
@@ -207,5 +253,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     textAlign: "center",
+  },
+  progressRow: {
+    marginTop: 16,
+    alignItems: "center",
+  },
+  progressText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  progressComplete: {
+    marginTop: 4,
+    fontSize: 16,
+    color: "#2d8a34",
+    fontWeight: "600",
   },
 });
