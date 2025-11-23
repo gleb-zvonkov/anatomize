@@ -1,0 +1,9 @@
+android/
+ios/
+
+# Expo caches and local build output
+.expo/
+.expo-shared/
+dist/
+web-build/
+node_modules/
