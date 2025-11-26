@@ -104,8 +104,22 @@ export default function HomeScreen() {
                   </Text>
                 </View>
 
-                <View style={styles.statusBadge}>
-                  <Text style={styles.statusBadgeText}></Text>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    state.progress[item.key as Region].chatComplete &&
+                      styles.statusBadgeComplete,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusBadgeText,
+                      state.progress[item.key as Region].chatComplete &&
+                        styles.statusBadgeTextComplete,
+                    ]}
+                  >
+                    {state.progress[item.key as Region].chatComplete ? "✓" : ""}
+                  </Text>
                 </View>
                 
               </View>
