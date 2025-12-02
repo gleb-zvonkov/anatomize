@@ -25,12 +25,15 @@ Notifications.setNotificationHandler({
 
 const STORAGE_KEY = "ANATOMIZE_APP_STATE_V1";
 const QUIZ_TARGET = 3;
+const CHAT_TARGET = 3;
 
 export type RegionProgress = {
   summaryRead: boolean;
   quizCorrectCount: number;
   quizComplete: boolean;
   correctQuestionIds: string[];
+  chatCount: number;
+  chatComplete: boolean;
 };
 
 export type AppState = {
@@ -44,6 +47,7 @@ type Action =
   | { type: "RESET_SUMMARY"; region: Region }
   | { type: "INCREMENT_QUIZ_CORRECT"; region: Region; questionId: string }
   | { type: "RESET_QUIZ"; region: Region }
+  | { type: "INCREMENT_CHAT"; region: Region }
   | { type: "SET_NOTIFICATIONS_GRANTED"; value: boolean };
 
 const createDefaultProgress = (): Record<Region, RegionProgress> => {
@@ -53,6 +57,8 @@ const createDefaultProgress = (): Record<Region, RegionProgress> => {
       quizCorrectCount: 0,
       quizComplete: false,
       correctQuestionIds: [],
+      chatCount: 0,
+      chatComplete: false,
     };
     return acc;
   }, {} as Record<Region, RegionProgress>);
@@ -128,6 +134,22 @@ const reducer = (state: AppState, action: Action): AppState => {
             quizCorrectCount: updatedCount,
             quizComplete: updatedCount >= QUIZ_TARGET,
             correctQuestionIds: updatedIds,
+          },
+        },
+      };
+    }
+    case "INCREMENT_CHAT": {
+      const current = state.progress[action.region];
+      if (current.chatComplete) return state;
+      const nextCount = Math.min(current.chatCount + 1, CHAT_TARGET);
+      return {
+        ...state,
+        progress: {
+          ...state.progress,
+          [action.region]: {
+            ...current,
+            chatCount: nextCount,
+            chatComplete: nextCount >= CHAT_TARGET,
           },
         },
       };

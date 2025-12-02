@@ -23,11 +23,37 @@ import {
 } from "react-native-safe-area-context"; //so doesnt touch notch
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 import { Region } from "../../types";
 import { useAppState } from "../../context/AppStateContext";
 
 const CHAT_STORAGE_PREFIX = "CHAT_HISTORY_";
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000"; //change to your backend URL
+const DEFAULT_API_PORT = process.env.EXPO_PUBLIC_API_PORT ?? "3000";
+
+const getApiBaseUrl = () => {
+  if (process.env.EXPO_PUBLIC_API_URL) return process.env.EXPO_PUBLIC_API_URL;
+
+  const hostUri =
+    Constants.expoConfig?.hostUri ??
+    Constants.expoGoConfig?.debuggerHost ??
+    Constants.expoGoConfig?.hostUri;
+
+  if (hostUri) {
+    const withoutProtocol = hostUri.replace(/^(https?:\/\/|exp:\/\/)/, "");
+    const host = withoutProtocol.split(":")[0];
+    if (host) {
+      return `http://${host}:${DEFAULT_API_PORT}`;
+    }
+  }
+
+  if (Platform.OS === "android") {
+    return `http://10.0.2.2:${DEFAULT_API_PORT}`;
+  }
+
+  return `http://localhost:${DEFAULT_API_PORT}`;
+};
+
+const API_BASE_URL = getApiBaseUrl(); // resolves to LAN IP while in Expo Go/dev client
 
 export type Message = {
   type: "user" | "gpt";
@@ -53,7 +79,7 @@ export default function ChatScreen() {
   const messagesRef = useRef<Message[]>([]);
   const [inputHeight, setInputHeight] = useState(40); // dynamic height for textInput, so textInput expands as user types multi line
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-  const { state } = useAppState();
+  const { state, dispatch } = useAppState();
   const notificationsEnabled = state.notificationsGranted;
   const isScreenActiveRef = useRef(true);
   const topContentPadding = 0 ;
@@ -248,6 +274,7 @@ export default function ChatScreen() {
     if (!pendingRequestRef.current) return;
     try {
       const reply = await fetchReply(pendingRequestRef.current.message);
+      dispatch({ type: "INCREMENT_CHAT", region: regionKey });
       pendingRequestRef.current = null;
       stopTypingInterval();
       startTypewriter(reply);
@@ -266,7 +293,7 @@ export default function ChatScreen() {
       ]);
       setIsSending(false);
     }
-  }, [applyMessages, fetchReply, startTypewriter, stopTypingInterval]);
+  }, [applyMessages, dispatch, fetchReply, regionKey, startTypewriter, stopTypingInterval]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextState) => {
@@ -314,6 +341,7 @@ export default function ChatScreen() {
 
     try {
       const reply = await fetchReply(message);
+      dispatch({ type: "INCREMENT_CHAT", region: regionKey });
       pendingRequestRef.current = null;
       stopTypingInterval();
       startTypewriter(reply);
