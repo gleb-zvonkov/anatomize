@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useMemo,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import ConfettiCannon from "react-native-confetti-cannon";
 import {
   View,
@@ -13,78 +7,102 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router"; //for easy routing
+import { useRouter, useLocalSearchParams } from "expo-router";
 import {
   SafeAreaView,
   useSafeAreaInsets,
-} from "react-native-safe-area-context"; //so doesn't touch notch
-import { quizData } from "../../data/quiz_questions"; //quiz questions
-import { Region } from "../../types/types"; //region type
+} from "react-native-safe-area-context";
+import { quizData } from "../../data/quiz_questions";
+import { Region } from "../../types/types";
 import { useAppState } from "../../context/AppStateContext";
 
-const shuffleIndices = (size: number) => {
-  const indices = Array.from({ length: size }, (_, idx) => idx);
-  for (let i = indices.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [indices[i], indices[j]] = [indices[j], indices[i]];
+// Backend fetch
+async function fetchBackendQuiz(region: string) {
+  try {
+    const res = await fetch("http://localhost:3000/quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ region }),
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    console.log("Fetched quiz question:", data);
+    return data;
+  } catch {
+    return null;
   }
-  return indices;
-};
+}
+
+// Local fallback random question
+function getRandomLocalQuestion(questions: any[]) {
+  const idx = Math.floor(Math.random() * questions.length);
+  console.log("Using local question", idx);
+  console.log("Question length", questions.length);
+  return questions[idx];
+}
 
 export default function QuizScreen() {
-
-  
-
   const router = useRouter();
-  const { region } = useLocalSearchParams(); //current region
+  const { region } = useLocalSearchParams();
   const regionParam = Array.isArray(region) ? region[0] : region;
   const regionKey = (regionParam ?? "back") as Region;
 
   const insets = useSafeAreaInsets();
-  const questions = quizData[regionKey] || []; //get quiz questions for the current region
-  const regenerateQueue = useCallback(
-    () => shuffleIndices(questions.length),
-    [questions.length]
-  );
-  const initialQueue = useMemo(() => regenerateQueue(), [regionKey]);
+  const questions = quizData[regionKey] || [];
 
-  const [questionQueue, setQuestionQueue] = useState<number[]>(initialQueue);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
-    initialQueue[0] ?? 0
-  );
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null); // the answer the user selects
+  const [currentQuestion, setCurrentQuestion] = useState<any>(null);
+  const [nextQuestion, setNextQuestion] = useState<any>(null); // ← NEW
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+
   const { state, dispatch } = useAppState();
   const regionProgress = state.progress[regionKey];
-  const question = questions[currentQuestionIndex ] || {
-    //the current question and a default one incase of issue
-    text: "No quiz available for this region.",
-    options: [],
-    answer: "",
-    explanation: "",
-  };
 
-  const fadeAnim = useRef(new Animated.Value(1)).current; // fade animation value
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
+  // ----------------------------------------------------
+  // 1. Load initial question AND preload the next one
+  // ----------------------------------------------------
   useEffect(() => {
-    setQuestionQueue(initialQueue);
-    setCurrentQuestionIndex(initialQueue[0] ?? 0);
-    setSelectedAnswer(null);
-  }, [initialQueue, regionKey]);
+    let isActive = true;
 
-  // fade in/out animations
-  //smoothly animates opacity from its current value to 1 over 300 ms, making the view fade in
+    async function load() {
+      const firstQ =
+        (await fetchBackendQuiz(regionKey)) ??
+        getRandomLocalQuestion(questions);
+
+      if (!isActive) return;
+      setCurrentQuestion(firstQ);
+
+      const preload =
+        (await fetchBackendQuiz(regionKey)) ??
+        getRandomLocalQuestion(questions);
+
+      if (!isActive) return;
+      setNextQuestion(preload);
+    }
+
+    load();
+    return () => {
+      isActive = false;
+    };
+  }, [regionKey, questions]);
+
+  // ----------------------------------------------------
+  // Fade helpers
+  // ----------------------------------------------------
   const fadeIn = () => {
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 400,
+      duration: 350,
       useNativeDriver: true,
     }).start();
   };
-  //fades the view out (opacity → 0) over 200 ms
+
   const fadeOut = (onComplete: () => void) => {
     Animated.timing(fadeAnim, {
       toValue: 0,
-      duration: 400,
+      duration: 350,
       useNativeDriver: true,
     }).start(() => {
       onComplete();
@@ -92,25 +110,31 @@ export default function QuizScreen() {
     });
   };
 
-  const advanceQuestion = useCallback(() => {
-    setQuestionQueue((prev) => {
-      if (prev.length <= 1) {
-        const reshuffled = regenerateQueue();
-        setCurrentQuestionIndex((reshuffled[0] ?? 0) as number);
-        return reshuffled;
-      }
-      const [, ...rest] = prev;
-      setCurrentQuestionIndex(rest[0]);
-      return rest;
-    });
-  }, [regenerateQueue]);
+  // ----------------------------------------------------
+  // 2. Next question logic with PRELOADING
+  // ----------------------------------------------------
+  const advanceQuestion = useCallback(async () => {
+    if (!nextQuestion) return;
 
+    // Use preloaded next question immediately
+    setCurrentQuestion(nextQuestion);
+
+    // Clear selection
+    setSelectedAnswer(null);
+
+    // Start preloading the FOLLOWING question
+    const preload =
+      (await fetchBackendQuiz(regionKey)) ?? getRandomLocalQuestion(questions);
+
+    setNextQuestion(preload);
+  }, [nextQuestion, questions, regionKey]);
+
+  //confetti effect when quiz is mastered
   const [showConfetti, setShowConfetti] = useState(false);
   useEffect(() => {
     if (regionProgress?.quizComplete) {
       // Trigger confetti without interfering with question render cycle
       setShowConfetti(true);
-
       const t = setTimeout(() => setShowConfetti(false), 1500);
       return () => clearTimeout(t);
     }
@@ -129,11 +153,11 @@ export default function QuizScreen() {
       {/* Question block, fade it in  */}
       <Animated.View style={{ opacity: fadeAnim }}>
         {/* Display the current quiz question */}
-        <Text style={styles.question}>{question.text}</Text>
+        <Text style={styles.question}>{currentQuestion?.text}</Text>
 
         {/* Render each answer option as a selectable button */}
-        {question.options.map((opt) => {
-          const isCorrect = opt === question.answer; // check if this option is the correct answer
+        {currentQuestion?.options.map((opt: string) => {
+          const isCorrect = opt === currentQuestion.answer; // check if this option is the correct answer
           const isSelected = selectedAnswer === opt; //check if user selected it
 
           let backgroundColor = "#f0f0f0"; // Default background color for unselected options
@@ -154,7 +178,7 @@ export default function QuizScreen() {
                   dispatch({
                     type: "INCREMENT_QUIZ_CORRECT",
                     region: regionKey,
-                    questionId: question.text,
+                    questionId: currentQuestion.text,
                   });
                 }
               }}
@@ -182,11 +206,11 @@ export default function QuizScreen() {
           <>
             {/* Show feedback text, "Correct" or "Incorrect" plus explanation */}
             <Text style={styles.explanation}>
-              {selectedAnswer === question.answer
-                ? `Correct. ${question.explanation} Current score: ${
+              {selectedAnswer === currentQuestion.answer
+                ? `Correct. ${currentQuestion.explanation} Current score: ${
                     regionProgress?.quizCorrectCount ?? 0
                   }/3.`
-                : `Incorrect. ${question.explanation} Current score: ${
+                : `Incorrect. ${currentQuestion.explanation} Current score: ${
                     regionProgress?.quizCorrectCount ?? 0
                   }/3.`}
             </Text>

@@ -50,5 +50,72 @@ app.post("/chat", async (req, res) => {    //chat endpoint
   }
 });
 
+
+app.post("/quiz", async (req, res) => {
+  const { region } = req.body;
+
+  const systemPrompt = `
+    You are an anatomy MCQ generator.
+
+    Your job:
+    - Generate ONE high-quality multiple-choice anatomy question.
+    - Topic: based strictly on the region provided by the user.
+    - Level: basic
+    - Always provide exactly 4 answer options.
+    - All options must be realistic anatomical structures.
+    - Make sure the correct answer matches exactly one item from the options array.
+    - Output ONLY valid JSON. No backticks, no markdown, no commentary.
+
+    The required JSON structure is:
+    {
+      "text": "Your question here",
+      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+      "answer": "Exact match to one option",
+      "explanation": "1–2 sentence explanation"
+    }
+    `;
+  
+  const quizPrompt = `Region: ${region}`;
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1-mini", // more reliable for JSON than 4o-mini
+        temperature: 0.4,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: quizPrompt },
+        ],
+      }),
+    });
+
+    const data = await response.json();
+    const raw = data.choices?.[0]?.message?.content;
+    if (!raw) return res.status(500).json({ error: "No response from model" });
+
+    // Parse JSON safely
+    let quiz;
+    try {
+      quiz = JSON.parse(raw);
+    } catch (e) {
+      console.error("JSON parse error:", raw);
+      return res.status(500).json({ error: "Invalid JSON from model" });
+    }
+
+    res.json(quiz);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error contacting OpenAI API" });
+  }
+});
+
+
+
+
 const PORT = process.env.PORT || 3000;  //use port from environment or default to 3000
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); //start server and log port number
