@@ -1,0 +1,8 @@
+# Prevent unwanted Expo SDK / React Native updates
+package.json merge=ours
+package-lock.json merge=ours
+yarn.lock merge=ours
+
+# Prevent unwanted native folder updates 
+frontend/android/** merge=ours
+frontend/ios/** merge=ours
