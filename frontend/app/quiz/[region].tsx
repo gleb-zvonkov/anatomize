@@ -1,4 +1,11 @@
-import React, { useState, useRef, useMemo, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useMemo,
+  useEffect,
+  useCallback,
+} from "react";
+import ConfettiCannon from "react-native-confetti-cannon";
 import {
   View,
   Text,
@@ -12,7 +19,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context"; //so doesn't touch notch
 import { quizData } from "../../data/quiz_questions"; //quiz questions
-import { Region } from "../../types"; //region type
+import { Region } from "../../types/types"; //region type
 import { useAppState } from "../../context/AppStateContext";
 
 const shuffleIndices = (size: number) => {
@@ -25,17 +32,22 @@ const shuffleIndices = (size: number) => {
 };
 
 export default function QuizScreen() {
+
+  
+
   const router = useRouter();
   const { region } = useLocalSearchParams(); //current region
   const regionParam = Array.isArray(region) ? region[0] : region;
   const regionKey = (regionParam ?? "back") as Region;
+
   const insets = useSafeAreaInsets();
   const questions = quizData[regionKey] || []; //get quiz questions for the current region
   const regenerateQueue = useCallback(
     () => shuffleIndices(questions.length),
     [questions.length]
   );
-  const initialQueue = useMemo(() => regenerateQueue(), [regenerateQueue]);
+  const initialQueue = useMemo(() => regenerateQueue(), [regionKey]);
+
   const [questionQueue, setQuestionQueue] = useState<number[]>(initialQueue);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
     initialQueue[0] ?? 0
@@ -43,7 +55,7 @@ export default function QuizScreen() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null); // the answer the user selects
   const { state, dispatch } = useAppState();
   const regionProgress = state.progress[regionKey];
-  const question = questions[currentQuestionIndex] || {
+  const question = questions[currentQuestionIndex ] || {
     //the current question and a default one incase of issue
     text: "No quiz available for this region.",
     options: [],
@@ -64,7 +76,7 @@ export default function QuizScreen() {
   const fadeIn = () => {
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 300,
+      duration: 400,
       useNativeDriver: true,
     }).start();
   };
@@ -72,7 +84,7 @@ export default function QuizScreen() {
   const fadeOut = (onComplete: () => void) => {
     Animated.timing(fadeAnim, {
       toValue: 0,
-      duration: 200,
+      duration: 400,
       useNativeDriver: true,
     }).start(() => {
       onComplete();
@@ -84,7 +96,7 @@ export default function QuizScreen() {
     setQuestionQueue((prev) => {
       if (prev.length <= 1) {
         const reshuffled = regenerateQueue();
-        setCurrentQuestionIndex(reshuffled[0] ?? 0);
+        setCurrentQuestionIndex((reshuffled[0] ?? 0) as number);
         return reshuffled;
       }
       const [, ...rest] = prev;
@@ -92,6 +104,17 @@ export default function QuizScreen() {
       return rest;
     });
   }, [regenerateQueue]);
+
+  const [showConfetti, setShowConfetti] = useState(false);
+  useEffect(() => {
+    if (regionProgress?.quizComplete) {
+      // Trigger confetti without interfering with question render cycle
+      setShowConfetti(true);
+
+      const t = setTimeout(() => setShowConfetti(false), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [regionProgress?.quizComplete]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -184,13 +207,20 @@ export default function QuizScreen() {
         )}
         {selectedAnswer && (
           <View style={styles.progressRow}>
-
             {regionProgress?.quizComplete && (
               <Text style={styles.progressComplete}>Quiz mastered ✓</Text>
             )}
           </View>
         )}
       </Animated.View>
+
+      {showConfetti && (
+        <ConfettiCannon
+          count={100}
+          origin={{ x: 200, y: -10 }}
+          fadeOut={true}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -199,13 +229,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingHorizontal: 20,  //padding from left and righ
+    paddingHorizontal: 20, //padding from left and righ
     paddingTop: 30, // more balanced spacing from top
   },
 
   backButton: {
     position: "absolute",
-    left: 20, 
+    left: 20,
     zIndex: 10, // keep it above other components
   },
 
@@ -223,12 +253,13 @@ const styles = StyleSheet.create({
     lineHeight: 26,
   },
 
-  option: {   //each answer option
+  option: {
+    //each answer option
     backgroundColor: "#f0f0f0",
     paddingVertical: 14,
     paddingHorizontal: 18,
     borderRadius: 14,
-    marginVertical: 8, //so there is space between them 
+    marginVertical: 8, //so there is space between them
   },
 
   optionText: {
@@ -237,22 +268,23 @@ const styles = StyleSheet.create({
   },
 
   explanation: {
-    marginTop: 20,  
+    marginTop: 20,
     fontSize: 16,
-    color: "#444",   
-    lineHeight: 22, // so its spaced out 
+    color: "#444",
+    lineHeight: 22, // so its spaced out
   },
 
   nextButton: {
     backgroundColor: "#000",
     paddingVertical: 14,
     paddingHorizontal: 28,
-    borderRadius: 25,  //circular 
+    borderRadius: 25, //circular
     alignSelf: "center",
-    marginTop: 28,  
+    marginTop: 28,
   },
 
-  nextText: {    //"Next Question"
+  nextText: {
+    //"Next Question"
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",

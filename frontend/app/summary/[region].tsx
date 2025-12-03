@@ -19,7 +19,7 @@ import {
 } from "react-native-safe-area-context"; //safe area and insets so we dont overlap notch area
 import Markdown from "react-native-markdown-display"; //renders text in markdown
 import { summaries } from "../../data/summaries"; // the summaries we will print
-import { Region } from "../../types"; //region types for typescript
+import { Region } from "../../types/types"; //region types for typescript
 import { useAppState } from "../../context/AppStateContext";
 
 export default function SummaryScreen() {
@@ -37,8 +37,7 @@ export default function SummaryScreen() {
       const { layoutMeasurement, contentOffset, contentSize } =
         event.nativeEvent;
       const isAtBottom =
-        layoutMeasurement.height + contentOffset.y >=
-        contentSize.height - 40;
+        layoutMeasurement.height + contentOffset.y >= contentSize.height - 40;
       if (isAtBottom) {
         dispatch({ type: "MARK_SUMMARY_READ", region: regionKey });
       }

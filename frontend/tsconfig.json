@@ -4,5 +4,5 @@
     "jsx": "react",
     "strict": true
   },
-  "include": ["app", "constants", "context", "data", "types.ts"]
+  "include": ["app", "constants", "context", "data", "types"]
 }

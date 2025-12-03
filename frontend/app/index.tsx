@@ -8,19 +8,19 @@
   3. Quiz - navigates to the quiz screen for that region
 */
 
-import React from "react";  
+import React from "react";
 import {
   Text,
-  StyleSheet,      // for styling component
+  StyleSheet, // for styling component
   TouchableOpacity, //a pressable component that fades on press
   FlatList, //scrollable list for rendering many items
   Image, //for the images of each region
-  View
+  View,
 } from "react-native";
-import { useState } from "react"; //useState for managing selected region state 
+import { useState } from "react"; //useState for managing selected region state
 import { SafeAreaView } from "react-native-safe-area-context"; //ensure content doesnt goes past notch
-import { useRouter } from "expo-router";  //for navigation between screens
-import { Region } from "../types"; // Define the type of regions, tells TypeScript that valid values are only those specific strings
+import { useRouter } from "expo-router"; //for navigation between screens
+import { Region } from "../types/types"; // Define the type of regions, tells TypeScript that valid values are only those specific strings
 import { REGION_ITEMS, regionImages } from "../constants/regions";
 import { useAppState } from "../context/AppStateContext";
 
@@ -121,7 +121,6 @@ export default function HomeScreen() {
                     {state.progress[item.key as Region].chatComplete ? "✓" : ""}
                   </Text>
                 </View>
-                
               </View>
               {/* region label */}
             </View>

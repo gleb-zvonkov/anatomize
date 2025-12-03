@@ -24,7 +24,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
-import { Region } from "../../types";
+import { Region } from "../../types/types";
 import { useAppState } from "../../context/AppStateContext";
 
 const CHAT_STORAGE_PREFIX = "CHAT_HISTORY_";
@@ -70,7 +70,9 @@ export default function ChatScreen() {
   const scrollViewRef = useRef<ScrollView>(null); //scroll view reference, so we can scroll as GPT responds
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pendingReplyRef = useRef<string | null>(null);
-  const pendingRequestRef = useRef<{ message: string; region: Region } | null>(null);
+  const pendingRequestRef = useRef<{ message: string; region: Region } | null>(
+    null
+  );
   const retryOnResumeRef = useRef(false);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const [isSending, setIsSending] = useState(false); //flag for sending so user cant send multiple queries at once
@@ -82,7 +84,7 @@ export default function ChatScreen() {
   const { state, dispatch } = useAppState();
   const notificationsEnabled = state.notificationsGranted;
   const isScreenActiveRef = useRef(true);
-  const topContentPadding = 0 ;
+  const topContentPadding = 0;
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true }); //everyitme a message is added scroll to the end
@@ -185,7 +187,11 @@ export default function ChatScreen() {
   const sendNotification = useCallback(
     async (body: string, force = false) => {
       if (!notificationsEnabled) return;
-      if (!force && appStateRef.current === "active" && isScreenActiveRef.current)
+      if (
+        !force &&
+        appStateRef.current === "active" &&
+        isScreenActiveRef.current
+      )
         return;
       const trimmed =
         body.length > 120 ? `${body.slice(0, 117).trimEnd()}…` : body;
@@ -255,9 +261,9 @@ export default function ChatScreen() {
           if (!prev.length) return prev;
           const updated = [...prev];
           const lastIndex = updated.length - 1;
-          const nextText = words.slice(0, Math.min(index + 1, words.length)).join(
-            " "
-          );
+          const nextText = words
+            .slice(0, Math.min(index + 1, words.length))
+            .join(" ");
           updated[lastIndex] = { ...updated[lastIndex], text: nextText };
           return updated;
         });
@@ -293,7 +299,14 @@ export default function ChatScreen() {
       ]);
       setIsSending(false);
     }
-  }, [applyMessages, dispatch, fetchReply, regionKey, startTypewriter, stopTypingInterval]);
+  }, [
+    applyMessages,
+    dispatch,
+    fetchReply,
+    regionKey,
+    startTypewriter,
+    stopTypingInterval,
+  ]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextState) => {
@@ -437,7 +450,6 @@ export default function ChatScreen() {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-
 }
 
 const styles = StyleSheet.create({
@@ -530,4 +542,3 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
 });
-

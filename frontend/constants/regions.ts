@@ -1,4 +1,4 @@
-import { Region } from "../types";
+import { Region } from "../types/types";
 
 export const REGION_ITEMS: { key: Region; label: string }[] = [
   { key: "back", label: "Back" },

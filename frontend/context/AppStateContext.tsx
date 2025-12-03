@@ -10,7 +10,7 @@ import React, {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
-import { Region } from "../types";
+import { Region } from "../types/types";
 import { ALL_REGIONS } from "../constants/regions";
 
 Notifications.setNotificationHandler({
@@ -116,24 +116,18 @@ const reducer = (state: AppState, action: Action): AppState => {
       };
     }
     case "INCREMENT_QUIZ_CORRECT": {
-      const current = state.progress[action.region];
-      if (
-        current.quizComplete ||
-        current.correctQuestionIds.includes(action.questionId)
-      ) {
-        return state;
-      }
-      const updatedIds = [...current.correctQuestionIds, action.questionId];
-      const updatedCount = Math.min(updatedIds.length, QUIZ_TARGET);
+      const prev = state.progress[action.region].quizCorrectCount;
+
+      const newCount = prev + 1;
+
       return {
         ...state,
         progress: {
           ...state.progress,
           [action.region]: {
-            ...current,
-            quizCorrectCount: updatedCount,
-            quizComplete: updatedCount >= QUIZ_TARGET,
-            correctQuestionIds: updatedIds,
+            ...state.progress[action.region],
+            quizCorrectCount: newCount,
+            quizComplete: newCount >= 3, // FIX: compute using newCount
           },
         },
       };
