@@ -29,22 +29,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-notifications"
-    ],
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "d66966f4-fda8-4994-8607-79a4b5411743"
-      }
-    },
-    "owner": "ianxlee",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/d66966f4-fda8-4994-8607-79a4b5411743"
-    }
+    "plugins": ["expo-router", "expo-notifications"]
   }
 }
