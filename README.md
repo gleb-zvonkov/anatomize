@@ -7,6 +7,11 @@ Anatomize is an interactive anatomy learning app built with React Native (Expo) 
 Gleb Zvonkov, gleb.zvonkov@mail.utoronto.ca  
 Ian Lee, ianx.lee@mail.utoronto.ca
 
+## Demo 
+Google Drive: https://drive.google.com/file/d/1_rzMfEMnJE1Cg_WgSDlH6mUTfv3sVTNd/view?usp=sharing 
+
+OneDrive: https://utoronto-my.sharepoint.com/personal/gleb_zvonkov_mail_utoronto_ca/_layouts/15/stream.aspx?id=%2Fpersonal%2Fgleb%5Fzvonkov%5Fmail%5Futoronto%5Fca%2FDocuments%2FDemo%2Emov&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&ga=1&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2Ec94c5792%2D13cb%2D4540%2Dabd4%2D227eda659886
+
 ## Motivation
 Understanding human anatomy can be overwhelming due to the large amount of memorization required. *Anatomize* was created to make this process interactive, structured, and engaging by combining region-based summaries, quizzes, and a GPT-powered chat tutor. 
 
