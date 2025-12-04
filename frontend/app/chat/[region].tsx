@@ -21,70 +21,40 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context"; //so doesnt touch notch
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
-import Constants from "expo-constants";
-import { Region } from "../../types/types";
-import { useAppState } from "../../context/AppStateContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";   // persistent local storage for saving chat history
+import * as Notifications from "expo-notifications";   // local push notification
+import { Region } from "../../types/types";    // strong typing for region names
+import { useAppState } from "../../context/AppStateContext";   // global state: progress, notifications permission,
+import { API_BASE_URL } from "../../utils/api";   // resolved backend URL
+import { Message } from "../../types/types"; // get the Message type which is user or GPT message
 
-const CHAT_STORAGE_PREFIX = "CHAT_HISTORY_";
-const DEFAULT_API_PORT = process.env.EXPO_PUBLIC_API_PORT ?? "3000";
 
-const getApiBaseUrl = () => {
-  if (process.env.EXPO_PUBLIC_API_URL) return process.env.EXPO_PUBLIC_API_URL;
-
-  const hostUri =
-    Constants.expoConfig?.hostUri ??
-    Constants.expoGoConfig?.debuggerHost ??
-    Constants.expoGoConfig?.hostUri;
-
-  if (hostUri) {
-    const withoutProtocol = hostUri.replace(/^(https?:\/\/|exp:\/\/)/, "");
-    const host = withoutProtocol.split(":")[0];
-    if (host) {
-      return `http://${host}:${DEFAULT_API_PORT}`;
-    }
-  }
-
-  if (Platform.OS === "android") {
-    return `http://10.0.2.2:${DEFAULT_API_PORT}`;
-  }
-
-  return `http://localhost:${DEFAULT_API_PORT}`;
-};
-
-const API_BASE_URL = getApiBaseUrl(); // resolves to LAN IP while in Expo Go/dev client
-
-export type Message = {
-  type: "user" | "gpt";
-  text: string;
-};
 
 export default function ChatScreen() {
   const router = useRouter(); //for navigation
   const insets = useSafeAreaInsets(); //for the back button
   const { region } = useLocalSearchParams(); //the current region
-  const regionParam = Array.isArray(region) ? region[0] : region;
-  const regionKey = (regionParam ?? "back") as Region;
-  const storageKey = `${CHAT_STORAGE_PREFIX}${regionKey}`;
+  const regionParam = Array.isArray(region) ? region[0] : region; // ensure region is a single string, even if React Navigation passes an array.
+  const regionKey = (regionParam ?? "back") as Region; //default to "back" region if none provided
+  const CHAT_STORAGE_PREFIX = "CHAT_HISTORY_"; //prefix for AsyncStorage keys
+  const storageKey = `${CHAT_STORAGE_PREFIX}${regionKey}`; //full storage key for this region
   const scrollViewRef = useRef<ScrollView>(null); //scroll view reference, so we can scroll as GPT responds
-  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingReplyRef = useRef<string | null>(null);
+  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null); // holds interval that animates “typewriter” GPT reply
+  const pendingReplyRef = useRef<string | null>(null); // Stores a full GPT reply waiting to finish being typed out.
   const pendingRequestRef = useRef<{ message: string; region: Region } | null>(
     null
-  );
-  const retryOnResumeRef = useRef(false);
+  ); // Stores an API request that failed due to app backgrounding and should retry later.
+  const retryOnResumeRef = useRef(false); // Boolean flag: whether we should retry sending a message when the app returns to foreground.
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const [isSending, setIsSending] = useState(false); //flag for sending so user cant send multiple queries at once
   const [inputText, setInputText] = useState(""); //Tracks what the user is typing in the TextInput
   const [messages, setMessages] = useState<Message[]>([]); //Keeps a running list of all messages (both user and GPT)
   const messagesRef = useRef<Message[]>([]);
   const [inputHeight, setInputHeight] = useState(40); // dynamic height for textInput, so textInput expands as user types multi line
-  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true); // boolean flag: whether we should retry sending a message when the app returns to foreground
   const { state, dispatch } = useAppState();
   const notificationsEnabled = state.notificationsGranted;
   const isScreenActiveRef = useRef(true);
-  const topContentPadding = 0;
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true }); //everyitme a message is added scroll to the end

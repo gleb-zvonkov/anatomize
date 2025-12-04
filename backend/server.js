@@ -1,15 +1,14 @@
 // This is the backend for our anatomize app. 
 // It sets up an Express server with a single POST endpoint at "/chat".
-// The "/chat" endpoint receives user input and region context ("thorax", "abdomen")
-// It construct a structured prompt
-// It send the structure prompt to OpenAI Chat Completions endpoint
-// It return the GPT model's reply.
+// The "/chat" endpoint receives user input and region context ("thorax", "abdomen") and replies to users prompt. 
+// The "/quiz" endpoint generates a multiple-choice question for the specified region.
 
 import express from "express";    
 import fetch from "node-fetch";   //Adds fetch() function to Node.js so the backend can make HTTP requests
 import cors from "cors";   // middleware that enables Cross-Origin Resource Sharing
 import dotenv from "dotenv"; // Allows loading environment variables from a .env, specefically the OpenAI API key
-import regionPrompts from "./regionPrompts.js";  //system prompt for different anatomical regions 
+import { regionPrompts, quizSystemPrompt } from "./gptPrompts.js";  //system prompt for different anatomical regions 
+
 
 dotenv.config();  //read .env file that contains OPENAI_API_KEY
 const app = express();   //create Express app
@@ -18,65 +17,8 @@ app.use(cors()); //enables Cross-Origin Resource Sharing
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY; //get OpenAI API key from environment variables
 
-app.post("/chat", async (req, res) => {    //chat endpoint 
-  const { region, inputText } = req.body;  //extract region and user input from request body
-
-  const systemPrompt =
-    regionPrompts[region] || "You are a helpful anatomy tutor.";  //get system prompt for the specified region, or default prompt
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {    //make POST request to OpenAI Chat Completions endpoint
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: inputText },
-        ],
-      }),
-    });
-
-    const data = await response.json(); //parse JSON response
-    const reply = data.choices?.[0]?.message?.content ?? "Error getting GPT Reply";   //get the model's reply or default message
-    res.json({ reply }); //send reply back to client as json 
-
-  } catch (err) {
-    console.error(err);   //log error to console
-    res.status(500).json({ error: "Error contacting OpenAI API" }); //send 500 error response
-  }
-});
-
-
-app.post("/quiz", async (req, res) => {
-  const { region } = req.body;
-
-  const systemPrompt = `
-    You are an anatomy MCQ generator.
-
-    Your job:
-    - Generate ONE high-quality multiple-choice anatomy question.
-    - Topic: based strictly on the region provided by the user.
-    - Level: basic
-    - Always provide exactly 4 answer options.
-    - All options must be realistic anatomical structures.
-    - Make sure the correct answer matches exactly one item from the options array.
-    - Output ONLY valid JSON. No backticks, no markdown, no commentary.
-
-    The required JSON structure is:
-    {
-      "text": "Your question here",
-      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-      "answer": "Exact match to one option",
-      "explanation": "1–2 sentence explanation"
-    }
-    `;
-  
-  const quizPrompt = `Region: ${region}`;
-
+// Function to call OpenAI API
+async function callOpenAI(messages) {
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -85,37 +27,65 @@ app.post("/quiz", async (req, res) => {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini", // more reliable for JSON than 4o-mini
-        temperature: 0.4,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: quizPrompt },
-        ],
+        model: "gpt-4o-mini", // default model
+        messages, // user/system messages
       }),
     });
-
-    const data = await response.json();
-    const raw = data.choices?.[0]?.message?.content;
-    if (!raw) return res.status(500).json({ error: "No response from model" });
-
-    // Parse JSON safely
-    let quiz;
-    try {
-      quiz = JSON.parse(raw);
-    } catch (e) {
-      console.error("JSON parse error:", raw);
-      return res.status(500).json({ error: "Invalid JSON from model" });
-    }
-
-    res.json(quiz);
+    return await response.json();
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error contacting OpenAI API" });
+    console.error("OpenAI request error:", err);
+    throw err;
+  }
+}
+
+//chat Route
+app.post("/chat", async (req, res) => {
+  const { region, inputText } = req.body;   //get the region and user input from request body 
+  const systemPrompt =
+    regionPrompts[region] || "You are a helpful anatomy tutor.";  //get system prompt for the region, or default prompt
+  
+  try {
+    const data = await callOpenAI([
+      //call OpenAI API
+      { role: "system", content: systemPrompt },
+      { role: "user", content: inputText },
+    ]);
+    const reply = data.choices?.[0]?.message?.content || "Error getting GPT reply."; //extract reply from API response
+    res.json({ reply }); //send reply back to client
+  } catch (err) {
+    res.status(500).json({ error: "Error contacting OpenAI API" }); //send error response
+  }
+});
+
+//quiz Route — generates MCQ JSON
+app.post("/quiz", async (req, res) => {
+  const { region } = req.body; //get region from request body
+  const userPrompt = `Generate a question for the region: ${region}`;  //creat the user prompt 
+
+  try {
+    const data = await callOpenAI([
+      //call openAI to generate quiz question for region, use system prompt so format is correct
+      { role: "system", content: quizSystemPrompt },
+      { role: "user", content: userPrompt },
+    ]);
+    const raw = data.choices?.[0]?.message?.content; //extract raw text response
+    if (!raw) {
+      return res.status(500).json({ error: "No response from model" });
+    }
+    let quizJson; // Attempt to parse JSON
+    try {
+      quizJson = JSON.parse(raw);
+    } catch (err) {
+      console.error("JSON parse error:", raw);
+      return res.status(500).json({ error: "Invalid JSON from model" });    //send error if JSON parsing fails
+    }
+    res.json(quizJson);   //send quiz question JSON back to client
+  } catch (err) {   
+    res.status(500).json({ error: "Error contacting OpenAI API" });  //send error response if OpenAI API call fails
   }
 });
 
 
-
-
-const PORT = process.env.PORT || 3000;  //use port from environment or default to 3000
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); //start server and log port number
+// Start server locally 
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

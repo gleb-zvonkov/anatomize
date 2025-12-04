@@ -4,6 +4,7 @@
 
 import { Region } from "../types/types";
 
+// Region summaries data
 export const summaries: Record<Region, string> = {
   back: `
 # Back

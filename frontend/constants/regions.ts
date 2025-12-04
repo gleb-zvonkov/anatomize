@@ -1,5 +1,12 @@
 import { Region } from "../types/types";
 
+/**
+ * REGION_ITEMS
+ * A list of all anatomical regions shown in the app.
+ * Each item provides:
+ *   - `key`: the internal region identifier (must match the Region type)
+ *   - `label`: the human-readable name shown in the UI
+ */
 export const REGION_ITEMS: { key: Region; label: string }[] = [
   { key: "back", label: "Back" },
   { key: "thorax", label: "Thorax" },
@@ -12,8 +19,16 @@ export const REGION_ITEMS: { key: Region; label: string }[] = [
   { key: "head", label: "Head" },
 ];
 
+/**
+ * Extract just the region keys from REGION_ITEMS.
+ */
 export const ALL_REGIONS: Region[] = REGION_ITEMS.map((item) => item.key);
 
+/**
+ * regionImages
+ * A mapping from each region to its corresponding image asset.
+ * Used to display images for each anatomical region in the UI.
+ */
 export const regionImages: Record<Region, any> = {
   back: require("../region_images/back.png"),
   thorax: require("../region_images/thorax.png"),

@@ -20,28 +20,30 @@ import {
 import Markdown from "react-native-markdown-display"; //renders text in markdown
 import { summaries } from "../../data/summaries"; // the summaries we will print
 import { Region } from "../../types/types"; //region types for typescript
-import { useAppState } from "../../context/AppStateContext";
+import { useAppState } from "../../context/AppStateContext";  //app state context for progress tracking
 
 export default function SummaryScreen() {
   const router = useRouter(); //router
   const insets = useSafeAreaInsets(); //contains space from the top notch
   const { region } = useLocalSearchParams(); //get the current region
-  const regionParam = Array.isArray(region) ? region[0] : region;
-  const regionKey = (regionParam ?? "back") as Region;
-  const { dispatch, state } = useAppState();
-  const summaryComplete = state.progress[regionKey]?.summaryRead;
+  const regionParam = Array.isArray(region) ? region[0] : region; //handle case where region param is an array
+  const regionKey = (regionParam ?? "back") as Region; //default to back region if none provided
+  const { dispatch, state } = useAppState(); //get app state and dispatch function
+  const summaryComplete = state.progress[regionKey]?.summaryRead; //check if summary has been read for this region
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (summaryComplete) return;
+      if (summaryComplete) return; // If the user has already completed this summary, do nothing.
       const { layoutMeasurement, contentOffset, contentSize } =
-        event.nativeEvent;
+        event.nativeEvent; // Extract scroll-related measurements from the event.
       const isAtBottom =
-        layoutMeasurement.height + contentOffset.y >= contentSize.height - 40;
+        layoutMeasurement.height + contentOffset.y >= contentSize.height - 40; // Check if the user has scrolled to the bottom:
       if (isAtBottom) {
+        // If the user reached the bottom, mark this region’s summary as “read”.
         dispatch({ type: "MARK_SUMMARY_READ", region: regionKey });
       }
     },
+    // Recreate the function only when dispatch, regionKey, or summaryComplete changes
     [dispatch, regionKey, summaryComplete]
   );
 

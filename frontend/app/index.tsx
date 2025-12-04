@@ -21,13 +21,14 @@ import { useState } from "react"; //useState for managing selected region state
 import { SafeAreaView } from "react-native-safe-area-context"; //ensure content doesnt goes past notch
 import { useRouter } from "expo-router"; //for navigation between screens
 import { Region } from "../types/types"; // Define the type of regions, tells TypeScript that valid values are only those specific strings
+
 import { REGION_ITEMS, regionImages } from "../constants/regions";
 import { useAppState } from "../context/AppStateContext";
 
 // Icons for summary, chat, and quiz buttons
-const summaryIcon = require("../screen_images/summary.png");
-const chatIcon = require("../screen_images/chat.png");
-const quizIcon = require("../screen_images/quiz.png");
+const summaryIcon = require("../assets/summary.png");
+const chatIcon = require("../assets/chat.png");
+const quizIcon = require("../assets/quiz.png");
 
 // HomeScreen component
 export default function HomeScreen() {
@@ -69,6 +70,7 @@ export default function HomeScreen() {
               </View>
 
               <View style={styles.statusRow}>
+                {/* SUMMARY STATUS BADGE */}
                 <View
                   style={[
                     styles.statusBadge,
@@ -86,6 +88,8 @@ export default function HomeScreen() {
                     {state.progress[item.key as Region].summaryRead ? "✓" : ""}
                   </Text>
                 </View>
+
+                {/* QUIZ STATUS BADGE */}
                 <View
                   style={[
                     styles.statusBadge,
@@ -104,6 +108,7 @@ export default function HomeScreen() {
                   </Text>
                 </View>
 
+                {/* CHAT STATUS BADGE */}
                 <View
                   style={[
                     styles.statusBadge,
@@ -122,7 +127,7 @@ export default function HomeScreen() {
                   </Text>
                 </View>
               </View>
-              {/* region label */}
+              
             </View>
 
             {selectedRegion === item.key && ( // if this region is selected, show the summary, chat, quiz buttons

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import ConfettiCannon from "react-native-confetti-cannon";
+import ConfettiCannon from "react-native-confetti-cannon";   //confetti effect for mastery of quiz
 import {
   View,
   Text,
@@ -7,16 +7,16 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";  //for back button and getting region param
 import {
   SafeAreaView,
   useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { quizData } from "../../data/quiz_questions";
-import { Region } from "../../types/types";
-import { useAppState } from "../../context/AppStateContext";
+} from "react-native-safe-area-context";  //so we dont overlap notch area
+import { quizData } from "../../data/quiz_questions";   //get data questions
+import { Region } from "../../types/types";   //region types for typescript
+import { useAppState } from "../../context/AppStateContext";  //access global app state
 
-// Backend fetch
+// Fetch quiz question from backend
 async function fetchBackendQuiz(region: string) {
   try {
     const res = await fetch("http://localhost:3000/quiz", {
@@ -34,64 +34,97 @@ async function fetchBackendQuiz(region: string) {
   }
 }
 
-// Local fallback random question
+// Fetch a random question from the local quiz data
 function getRandomLocalQuestion(questions: any[]) {
   const idx = Math.floor(Math.random() * questions.length);
-  console.log("Using local question", idx);
-  console.log("Question length", questions.length);
   return questions[idx];
 }
 
+// Main QuizScreen component
 export default function QuizScreen() {
-  const router = useRouter();
-  const { region } = useLocalSearchParams();
-  const regionParam = Array.isArray(region) ? region[0] : region;
-  const regionKey = (regionParam ?? "back") as Region;
+  const router = useRouter(); //for back button
+  const { region } = useLocalSearchParams(); //get the current region
+  const insets = useSafeAreaInsets(); //contains space from the top notch
 
-  const insets = useSafeAreaInsets();
-  const questions = quizData[regionKey] || [];
+  const regionParam = Array.isArray(region) ? region[0] : region; //becauase params can be arrays
+  const regionKey = (regionParam ?? "back") as Region; //default to back region if none provided
+  const questions = quizData[regionKey] || []; //get local questions for this region
 
-  const [currentQuestion, setCurrentQuestion] = useState<any>(null);
-  const [nextQuestion, setNextQuestion] = useState<any>(null); // ← NEW
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<any>(null); // Current quiz question being displayed
+  const [nextQuestion, setNextQuestion] = useState<any>(null); // Preloaded next quiz question
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null); // User's selected answer
 
-  const { state, dispatch } = useAppState();
-  const regionProgress = state.progress[regionKey];
+  const { state, dispatch } = useAppState(); //acceess global state, and add to it using dispatch
+  const regionProgress = state.progress[regionKey]; //progress for this region, an example below
+  /*
+  progress: {
+    back: {
+      summaryRead: false,
+      quizCorrectCount: 0,
+      quizComplete: false,
+      correctQuestionIds: [],
+      chatCount: 0,
+      chatComplete: false
+    },
+    ... 
+  } 
+  */
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const [showConfetti, setShowConfetti] = useState(false); //use state for confeeti
 
-  // ----------------------------------------------------
-  // 1. Load initial question AND preload the next one
-  // ----------------------------------------------------
+  /***Load initial question AND preload the next one***/
   useEffect(() => {
-    let isActive = true;
+    let isActive = true; //state flag to prevent state updates after unmouting
 
     async function load() {
+      //async function to load questions
       const firstQ =
         (await fetchBackendQuiz(regionKey)) ??
-        getRandomLocalQuestion(questions);
+        getRandomLocalQuestion(questions); //try fetch from backend, else get local function
 
-      if (!isActive) return;
+      //we will check unmounted state after each async operation
+      if (!isActive) return; //prevent state updates if component unmounted
       setCurrentQuestion(firstQ);
 
       const preload =
         (await fetchBackendQuiz(regionKey)) ??
-        getRandomLocalQuestion(questions);
+        getRandomLocalQuestion(questions); //preload next question
 
-      if (!isActive) return;
+      //we will check unmounted state after each async operation
+      if (!isActive) return; //only update state if still mounted
       setNextQuestion(preload);
     }
 
-    load();
+    load(); //execute the async loader on mount or dependency change.
     return () => {
+      //When the component unmounts, mark isActive = false
       isActive = false;
     };
   }, [regionKey, questions]);
 
-  // ----------------------------------------------------
-  // Fade helpers
-  // ----------------------------------------------------
+  /* Below is logic to set the next question along with preloading the next question*/
+  const advanceQuestion = useCallback(async () => {
+    if (!nextQuestion) return;
+
+    // Use preloaded next question immediately
+    setCurrentQuestion(nextQuestion);
+
+    // Clear selection
+    setSelectedAnswer(null);
+
+    // Start preloading the next question
+    const preload =
+      (await fetchBackendQuiz(regionKey)) ?? getRandomLocalQuestion(questions);
+
+    setNextQuestion(preload); // Set the preloaded question for next time
+  }, [nextQuestion, regionKey]); //dependencies for useCallback
+  //if nextQuestion changes → advanceQuestion must update the UI with the new preloaded question
+  //if Regiokey to generate new quqesiton when region changes
+
+  /*Fade in and out functions for transitioning between quiz screens*/
   const fadeIn = () => {
+    //fade in animation
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 350,
@@ -100,6 +133,7 @@ export default function QuizScreen() {
   };
 
   const fadeOut = (onComplete: () => void) => {
+    //fade out animation
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 350,
@@ -110,35 +144,6 @@ export default function QuizScreen() {
     });
   };
 
-  // ----------------------------------------------------
-  // 2. Next question logic with PRELOADING
-  // ----------------------------------------------------
-  const advanceQuestion = useCallback(async () => {
-    if (!nextQuestion) return;
-
-    // Use preloaded next question immediately
-    setCurrentQuestion(nextQuestion);
-
-    // Clear selection
-    setSelectedAnswer(null);
-
-    // Start preloading the FOLLOWING question
-    const preload =
-      (await fetchBackendQuiz(regionKey)) ?? getRandomLocalQuestion(questions);
-
-    setNextQuestion(preload);
-  }, [nextQuestion, questions, regionKey]);
-
-  //confetti effect when quiz is mastered
-  const [showConfetti, setShowConfetti] = useState(false);
-  useEffect(() => {
-    if (regionProgress?.quizComplete) {
-      // Trigger confetti without interfering with question render cycle
-      setShowConfetti(true);
-      const t = setTimeout(() => setShowConfetti(false), 1500);
-      return () => clearTimeout(t);
-    }
-  }, [regionProgress?.quizComplete]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -175,11 +180,19 @@ export default function QuizScreen() {
               onPress={() => {
                 setSelectedAnswer(opt); //select the option
                 if (!selectedAnswer && isCorrect) {
+                  const prev = regionProgress.quizCorrectCount; //number of correct answers before tap
+                  const next = prev + 1; //number of correct answers after tap
+
                   dispatch({
                     type: "INCREMENT_QUIZ_CORRECT",
                     region: regionKey,
                     questionId: currentQuestion.text,
                   });
+
+                  if (prev < 3 && next === 3) {
+                    //if user just reached mastery (3 correct answers)
+                    setShowConfetti(true); //show confetti
+                  }
                 }
               }}
             >
@@ -219,6 +232,7 @@ export default function QuizScreen() {
             <TouchableOpacity
               style={styles.nextButton}
               onPress={() => {
+                setShowConfetti(false); //reset confetti in if it ran we down want it running again
                 fadeOut(() => {
                   setSelectedAnswer(null);
                   advanceQuestion();
@@ -230,14 +244,17 @@ export default function QuizScreen() {
           </>
         )}
         {selectedAnswer && (
+          // Only show progress status AFTER the user selects an answer
           <View style={styles.progressRow}>
             {regionProgress?.quizComplete && (
+              // If the user has reached 3 correct answers → show mastery badge
               <Text style={styles.progressComplete}>Quiz mastered ✓</Text>
             )}
           </View>
         )}
       </Animated.View>
-
+      
+      {/* Confetti effect when user masters the quiz */}
       {showConfetti && (
         <ConfettiCannon
           count={100}
@@ -245,6 +262,7 @@ export default function QuizScreen() {
           fadeOut={true}
         />
       )}
+
     </SafeAreaView>
   );
 }
@@ -272,8 +290,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "500",
     color: "#000",
-    marginBottom: 20,
-    marginTop: 10,
+    marginBottom: 20, // spacing below the question
+    marginTop: 10, // spacing above the question
     lineHeight: 26,
   },
 
@@ -287,7 +305,7 @@ const styles = StyleSheet.create({
   },
 
   optionText: {
-    fontSize: 18,
+    fontSize: 18, // size for answer text
     color: "#000",
   },
 
@@ -308,7 +326,7 @@ const styles = StyleSheet.create({
   },
 
   nextText: {
-    //"Next Question"
+    // text inside the next button
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
@@ -325,7 +343,7 @@ const styles = StyleSheet.create({
   progressComplete: {
     marginTop: 4,
     fontSize: 16,
-    color: "#2d8a34",
+    color: "#2d8a34", // green color for success indicator
     fontWeight: "600",
   },
 });

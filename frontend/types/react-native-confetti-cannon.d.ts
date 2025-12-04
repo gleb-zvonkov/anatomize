@@ -1,3 +1,9 @@
+/**
+ * Type definitions for react-native-confetti-cannon.
+ * The library has no built-in TypeScript types, so this
+ * module tells TS what props the component accepts.
+ */
+
 declare module "react-native-confetti-cannon" {
   import React from "react";
   import { ViewProps } from "react-native";
@@ -13,4 +19,3 @@ declare module "react-native-confetti-cannon" {
 
   export default class ConfettiCannon extends React.Component<ConfettiCannonProps> {}
 }
-

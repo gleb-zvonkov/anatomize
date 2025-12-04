@@ -248,3 +248,44 @@ export const useAppState = () => {
   }
   return context;
 };
+
+
+// Example of the shape of the stored AppState object:
+/*
+{
+  notificationsGranted: false,
+  progress: {
+    back: {
+      summaryRead: false,
+      quizCorrectCount: 0,
+      quizComplete: false,
+      correctQuestionIds: [],
+      chatCount: 0,
+      chatComplete: false
+    },
+
+    abdomen: {
+      summaryRead: false,
+      quizCorrectCount: 0,
+      quizComplete: false,
+      correctQuestionIds: [],
+      chatCount: 0,
+      chatComplete: false
+    },
+
+    thorax: {
+      summaryRead: false,
+      quizCorrectCount: 0,
+      quizComplete: false,
+      correctQuestionIds: [],
+      chatCount: 0,
+      chatComplete: false
+    },
+
+    ...
+ 
+  }
+}
+
+
+*/
