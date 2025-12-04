@@ -32,7 +32,8 @@ Understanding human anatomy can be overwhelming due to the large amount of memor
 
 ## Features
 #### React Native and Expo Development
-Built with React Native (Expo) using TypeScript.       
+Built with React Native (Expo).
+TypeScript ensures that only valid, predefined region names can be used throughout the app.
 Includes four main screens: Home, Summary, Chat, and Quiz.     
 Uses core React Native components (View, Text, TextInput, FlatList) and hooks (useState, useEffect).
 
@@ -151,7 +152,8 @@ Gleb implemented quiz retrieval locally.
 Gleb implemented custom animations, including the confetti effect.      
 Ian implemented global progress tracking with useReducer to show summary, quiz, and chat completion checkmarks on the home screen.     
 Ian added persistent chat history per region.       
-Ian wired up Expo Notifications for tutor reply alerts.           
+Ian wired up Expo Notifications for tutor reply alerts.   
+Ian deploy the app.         
 Ian documented the deployment plan.     
 
 ## Lesson Learned
