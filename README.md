@@ -2,25 +2,20 @@
 # Anatomize
 
 Anatomize is an interactive anatomy learning app built with React Native (Expo) and a Node.js + Express backend. It combines structured anatomy summaries, interactive quizzes, and a GPT-powered chat tutor to support medical and life-science students.
-
-## To Do
-1. Implement checkmark for using chat function for 3 messages. 
-2. Store more quiz questions in the backend, retrieve them in frontend when online. 
-3. Add more custom animation? 
-4. Deploy.  
-
+ 
 ## Team Information
 Gleb Zvonkov, gleb.zvonkov@mail.utoronto.ca  
 Ian Lee, ianx.lee@mail.utoronto.ca
 
 ## Motivation
-Understanding human anatomy can be overwhelming due to the large amount of memorization required. *Anatomize* was created to make this process interactive, structured, and engaging by combining region-based summaries, quizzes, and a GPT-powered chat tutor. The goal is to allow students to actively learn through conversation and self-testing rather than passive reading.
+Understanding human anatomy can be overwhelming due to the large amount of memorization required. *Anatomize* was created to make this process interactive, structured, and engaging by combining region-based summaries, quizzes, and a GPT-powered chat tutor. 
 
 ## Objectives
 - Create a mobile app that helps anatomy students learn efficiently.
-- Integrate AI-driven tutoring to generate adaptive explanations. 
-- Provide summaries and quizzes organized by anatomical regions.  
 - Design a clean, mobile-friendly user interface. 
+- Provide summaries and quizzes organized by anatomical regions.  
+- Integrate AI-driven tutoring. 
+- Progress tracking to see what you mastered.
 
 ## Technical Stack
 | Component | Technology |
@@ -29,20 +24,95 @@ Understanding human anatomy can be overwhelming due to the large amount of memor
 | **Navigation** | Expo Router |
 | **Backend** | Node.js + Express  |
 | **AI Integration** | OpenAI API  |
-| **State Management** | Context + useReducer (region progress + notification permissions) |
+| **State Management** | Context + useReducer for region progress  |
 | **Persistence** | AsyncStorage for chat history and progress |
 | **Notifications** | Expo Notifications for local tutor-reply alerts |
 | **Styling** | React Native `StyleSheet` |
-| **Deployment** |  Expo / EAS (see Deployment section) |
+| **Deployment** |  Expo / EAS |
 
 ## Features
-- **Home Screen:** Displays all anatomical regions (Back, Thorax, Abdomen, ...)  
-- **Summaries:** Markdown-based content explaining regional anatomy with automatic “read” tracking.  
-- **Chat Tutor:** GPT-powered interactive dialogue for each region.  
-- **Chat History Persistence:** Region-specific conversations are saved locally so you can resume later.  
-- **Quizzes:** Multiple-choice questions with explanations and animations plus mastery tracking (3 correct answers). 
-- **Progress Badges:** Summary/quiz completion checkmarks appear on each region card.  
-- **Notifications:** Local alerts fire when new tutor replies arrive (requires user permission). 
+#### React Native and Expo Development
+Built with React Native (Expo) using TypeScript.       
+Includes four main screens: Home, Summary, Chat, and Quiz.     
+Uses core React Native components (View, Text, TextInput, FlatList) and hooks (useState, useEffect).
+
+#### Navigation
+Implemented with Expo Router using file-based routing.      
+Dynamic routes `[region].tsx` handle navigation between anatomical regions.     
+`app/index.tsx` — Home screen listing all anatomical regions.      
+`app/summary/[region].tsx` — Shows the summary for a selected region.     
+`app/quiz/[region].tsx` — Displays the interactive quiz for that region.    
+`app/chat/[region].tsx` — AI chat tutor for the chosen region.   
+
+#### State Management 
+Uses Context + useReducer to track completion of tasks for each region.    
+Reading a summary is recorded in global state.    
+Interacting with the GPT chat for several messages is recorded in global state.    
+Correctly answering three quiz questions is recorded in global state.      
+The home screen displays a checkmark beside each region to show which tasks (summary, quiz, chat) have been completed.        
+Below is an example of our AppState object:
+```
+{
+  notificationsGranted: false,
+  progress: {
+    back: {
+      summaryRead: false,
+      quizCorrectCount: 0,
+      quizComplete: false,
+      correctQuestionIds: [],
+      chatCount: 0,
+      chatComplete: false
+    },
+
+    abdomen: {
+      summaryRead: false,
+      quizCorrectCount: 0,
+      quizComplete: false,
+      correctQuestionIds: [],
+      chatCount: 0,
+      chatComplete: false
+    },
+
+    thorax: {
+      summaryRead: false,
+      quizCorrectCount: 0,
+      quizComplete: false,
+      correctQuestionIds: [],
+      chatCount: 0,
+      chatComplete: false
+    },
+
+    ...
+ 
+  }
+}
+```
+
+#### Persistence
+Chat history is saved in AsyncStorage so conversations survive app restarts.     
+Global state is also persisted, ensuring that completion records for summary, chat, and quiz tasks remain intact even after closing or restarting the app
+
+#### Notifications
+Expo Notifications request permissions on launch and dispatch a local alert whenever a new tutor reply finishes streaming.
+
+#### Backend Integration
+Backend built with Node.js + Express.        
+One route fetches GPT-generated chat tutor replies for a specific region.     
+One route fetches an GPT-generated quiz question for a specific region.    
+Both routes use the OpenAI API to dynamically generate content.   
+
+#### Advanced Feature 1: Custom Animations 
+React Native’s Animated module is used to create smooth fade transitions between quiz questions. The ConfettiCannon component from react-native-confetti-cannon is used to display a celebration effect when the user completes three quiz questions.
+
+#### Advanced Feature 2: Integration with External Services
+The app connects to the OpenAI GPT API to generate anatomy tutor chat
+responses and dynamically created multiple-choice quiz questions for each region.
+
+#### Advanced Feature 3: Gamification
+Gamification is implemented through real-time quiz tracking and quiz/summary/chat tracking on the home screen. Each quiz screen dynamically tracks correct answers, and confetti is triggered after three correct responses. The home screen shows a progress tracker for each region, displaying checkmarks for completed summary, quiz, and chat tasks.
+
+#### Advanced Feature 4: Offline Support
+The app supports offline usage by falling back on locally stored data when the backend is unreachable. Specifically, if the backend can't generate a quiz question, the app uses preloaded local questions instead. Furthermore, tutor chat conversations are saved in local storage (via AsyncStorage), allowing users to review past messages even when offline.
 
 ## User Guide
 - **Home Screen:** Tap an anatomical region to expand available modes *Summary*, *Chat*, *Quiz*.  
@@ -66,9 +136,9 @@ create an .env file with OPENAI_API_KEY
 npm run dev   
 ```
 
-### Environment variables
-- `backend/.env` &rarr; `OPENAI_API_KEY=<your OpenAI key>`  
-- `frontend` &rarr; create (or extend) `app.config.js`/shell env with `EXPO_PUBLIC_API_URL=https://your-backend-host` so the mobile app knows where to send chat requests.
+There are two important envrionment vairbales:      
+1. `backend/.env` which contains `OPENAI_API_KEY=<your OpenAI key>`.    
+2. In the frontend set `EXPO_PUBLIC_API_URL=https://your-backend-host`, otherwise, it falls back to a default URL based on your local Expo environment.
 
 ## Deployment Information
 See `DEPLOYMENT.md` for step-by-step frontend (Expo Publish / EAS) and backend hosting instructions. Actual publishing requires access to your Expo account and production backend credentials, so the repo only contains the documented process.
@@ -76,77 +146,58 @@ See `DEPLOYMENT.md` for step-by-step frontend (Expo Publish / EAS) and backend h
 ## Individual Contributions
 Gleb developed the core frontend components using Expo Router.   
 Gleb built the backend server.    
-Gleb integrated the OpenAI API.   
-Ian implemented global progress tracking with useReducer to show summary/quiz completion checkmarks on the home screen.   
-Ian added persistent chat history per region and wired Expo Notifications for tutor reply alerts.    
-Ian documented the deployment plan and test matrix.     
+Gleb implemented quiz retrieval from the backend.     
+Gleb implemented quiz retrieval locally.     
+Gleb implemented custom animations, including the confetti effect.      
+Ian implemented global progress tracking with useReducer to show summary, quiz, and chat completion checkmarks on the home screen.     
+Ian added persistent chat history per region.       
+Ian wired up Expo Notifications for tutor reply alerts.           
+Ian documented the deployment plan.     
 
 ## Lesson Learned
-TODO
+Designing a smooth user experience across both frontend and backend requires careful handling of state, persistence, and API communication. We learned how to structure React Native projects for modularity, scalability, and offline support. Integrating OpenAI's API taught us how to handle asynchronous data generation and error cases gracefully.        
 
 ## Concluding Remarks 
-TODO
+This project successfully brought together multiple technologies to build an interactive, educational mobile app. The modular design and region-based content structure make it easy to extend the app in the future.
 
-## Project Requirements 
-#### React Native and Expo Development
-Built with React Native (Expo) using TypeScript.       
-Includes four main screens: Home, Summary, Chat, and Quiz.     
-Uses core React Native components (View, Text, TextInput, FlatList) and hooks (useState, useEffect).
-
-#### Navigation
-Implemented with Expo Router using file-based routing in the /app directory.      
-Dynamic routes like [region].tsx handle navigation between anatomical regions.
-
-#### State Management and Persistence
-Uses Context + useReducer to track summary/quiz completion per region (with persistence).      
-Chat history is saved in AsyncStorage so conversations survive app restarts.
-
-#### Notifications
-Expo Notifications request permissions on launch and dispatch a local alert whenever a new tutor reply finishes streaming.
-
-#### Backend Integration
-Backend built with Node.js + Express.         
-Integrated with the OpenAI API for GPT-based tutoring responses.      
-Uses fetch() on the frontend to send chat data and receive AI-generated replies.
-
-#### Advanced Feature 1: Custom Animations 
-React Native’s Animated API in Quiz.
-
-### Advanced Feature 2: Integration with External Services
-Use OpenAI api.
-
-### Advanced Feature 3: Gamification
-Progress tracking on each screen.
-Global progress tracking on home screen. 
-
-### Advanced Feature 3: Offline Support
-Save past GPT conversations in chat screen to view offline. 
-
-#### Deployment
-Documented Expo Publish / EAS build workflow (requires Expo credentials).
-
-#### Advanced Features
-- Region progress visualization with dual checkmarks.  
-- Persistent GPT chat with animated type-out effect.  
-- Quiz mastery tracking (requires three correct answers per region).  
-- Local tutor reply notifications.
 
 ## Project Structure
-├── backend/ # Node.js + Express REST API
-│ ├── server.js # Handles GPT requests and quiz endpoints
-│ ├── regionPrompts.js # Prompt templates per body region
-│ ├── .env # API key for GPT
+```
+backend/                     # Node.js + Express API (chat + quiz)
+│   server.js                # Main backend server
+│   gptPrompts.js            # GPT system prompts for chat + quiz
+│   .env                     # OpenAI API key + environment config
+│   package.json             # Backend dependencies
+
+frontend/                    # Expo React Native mobile app
 │
-├── frontend/ # React Native (Expo) mobile app
-│ ├── app/ # Screens and navigation
-│ │ ├── index.tsx # Home screen
-│ │ ├── summary/[region].tsx # Region summaries
-│ │ ├── chat/[region].tsx # GPT chat interface
-│ │ └── quiz/[region].tsx # Interactive quizzes
-│ ├── data/ # Static data (summaries, quiz questions)
-│ ├── region_images/ # Region icons
-│ ├── screen_images/ # summary, gpt, quiz icons
+│ app/                       # All screens (Expo Router)
+│   ├── index.tsx            # Home screen
+│   ├── summary/[region].tsx # Summary screen per region
+│   ├── chat/[region].tsx    # GPT chat screen
+│   └── quiz/[region].tsx    # Quiz screen
 │
-└── types.ts # contains TypeScript type region 
+│ constants/                 # Global region lists + images
+│   regions.ts               # REGION_ITEMS, ALL_REGIONS, regionImages
+│
+│ context/                   # Global state (progress, notifications)
+│   AppStateContext.tsx
+│
+│ data/                      # Local study content
+│   summaries.ts             # Hardcoded summaries
+│   quiz_questions.ts        # Fallback local quiz questions
+│
+│ region_images/             # Icons for region buttons
+│
+│ types/                     # Shared TypeScript types
+│   types.ts                 # Region, Message
+│
+│ utils/
+│   api.ts                   # API_BASE_URL resolver
+│
+│ app.json / eas.json        # Expo & EAS config
+│ package.json               # App dependencies
+
+```
 
 

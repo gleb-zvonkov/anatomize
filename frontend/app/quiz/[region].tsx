@@ -15,11 +15,12 @@ import {
 import { quizData } from "../../data/quiz_questions";   //get data questions
 import { Region } from "../../types/types";   //region types for typescript
 import { useAppState } from "../../context/AppStateContext";  //access global app state
+import { API_BASE_URL } from "../../utils/api";   // resolved backend URL
 
 // Fetch quiz question from backend
 async function fetchBackendQuiz(region: string) {
   try {
-    const res = await fetch("http://localhost:3000/quiz", {
+    const res = await fetch(`${API_BASE_URL}/quiz`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ region }),
