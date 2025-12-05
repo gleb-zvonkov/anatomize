@@ -15,7 +15,22 @@ const app = express();   //create Express app
 app.use(express.json()); // middleware that automatically parses incoming JSON request bodies
 app.use(cors()); //enables Cross-Origin Resource Sharing
 
+// Basic request logger for visibility into responses
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    console.log(`${req.method} ${req.originalUrl} -> ${res.statusCode} (${duration}ms)`);
+  });
+  next();
+});
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY; //get OpenAI API key from environment variables
+
+// Simple healthcheck to confirm connectivity from clients/emulators
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
 
 // Function to call OpenAI API
 async function callOpenAI(messages) {
@@ -31,6 +46,10 @@ async function callOpenAI(messages) {
         messages, // user/system messages
       }),
     });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`OpenAI HTTP ${response.status}: ${text}`);
+    }
     return await response.json();
   } catch (err) {
     console.error("OpenAI request error:", err);
@@ -45,6 +64,7 @@ app.post("/chat", async (req, res) => {
     regionPrompts[region] || "You are a helpful anatomy tutor.";  //get system prompt for the region, or default prompt
   
   try {
+    console.log("POST /chat", { region });
     const data = await callOpenAI([
       //call OpenAI API
       { role: "system", content: systemPrompt },
@@ -53,6 +73,7 @@ app.post("/chat", async (req, res) => {
     const reply = data.choices?.[0]?.message?.content || "Error getting GPT reply."; //extract reply from API response
     res.json({ reply }); //send reply back to client
   } catch (err) {
+    console.error("Error handling /chat:", err);
     res.status(500).json({ error: "Error contacting OpenAI API" }); //send error response
   }
 });
@@ -63,6 +84,7 @@ app.post("/quiz", async (req, res) => {
   const userPrompt = `Generate a question for the region: ${region}`;  //creat the user prompt 
 
   try {
+    console.log("POST /quiz", { region });
     const data = await callOpenAI([
       //call openAI to generate quiz question for region, use system prompt so format is correct
       { role: "system", content: quizSystemPrompt },
@@ -81,6 +103,7 @@ app.post("/quiz", async (req, res) => {
     }
     res.json(quizJson);   //send quiz question JSON back to client
   } catch (err) {   
+    console.error("Error handling /quiz:", err);
     res.status(500).json({ error: "Error contacting OpenAI API" });  //send error response if OpenAI API call fails
   }
 });
