@@ -147,7 +147,8 @@ There are two important envrionment vairbales:
 2. In the frontend set `EXPO_PUBLIC_API_URL=https://your-backend-host`, otherwise, it falls back to a default URL based on your local Expo environment.
 
 ## Deployment Information
-See `DEPLOYMENT.md` for step-by-step frontend (Expo Publish / EAS) and backend hosting instructions. Actual publishing requires access to your Expo account and production backend credentials, so the repo only contains the documented process.
+- Android APK (EAS Build): https://expo.dev/artifacts/eas/8SJtnTZdqBWfwfAG7fDPdt.apk
+- To run: clone the repo → set `OPENAI_API_KEY` in `backend/.env` → `cd backend && npm install && npm run dev` → install the APK on an Android emulator (it connects to `http://10.0.2.2:3000`). For a physical device on the same Wi‑Fi, rebuild with `EXPO_PUBLIC_API_URL` set to your host LAN IP.
 
 ## Individual Contributions
 Gleb developed the core frontend components using Expo Router.   
