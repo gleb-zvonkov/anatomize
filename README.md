@@ -148,7 +148,7 @@ There are two important envrionment vairbales:
 
 ## Deployment Information
 - Android APK (EAS Build): https://expo.dev/artifacts/eas/8SJtnTZdqBWfwfAG7fDPdt.apk
-- To run: clone the repo → set `OPENAI_API_KEY` in `backend/.env` → `cd backend && npm install && npm run dev` → install the APK on an Android emulator (it connects to `http://10.0.2.2:3000`). For a physical device on the same Wi‑Fi, rebuild oe follow the development steps with `EXPO_PUBLIC_API_URL` set to your host LAN IP.
+- To run: clone the repo → set `OPENAI_API_KEY` in `backend/.env` → `cd backend && npm install && npm run dev` → install the APK on an Android emulator (it connects to `http://10.0.2.2:3000`). For a physical device on the same Wi‑Fi, rebuild or follow the development steps with `EXPO_PUBLIC_API_URL` set to your host LAN IP.
 
 ## Individual Contributions
 Gleb developed the core frontend components using Expo Router.   
